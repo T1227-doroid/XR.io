@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XR-9000構成アプリケーション Osaka Branch ver</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            display: none; /* 初期状態で非表示 */
+            width: 100%;
+            height: 100vh;
+        }
+        .splash-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background-color: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: opacity 1s ease-out; /* フェードアウトのアニメーション */
+        }
+        .splash-screen img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .questions {
+            width: 35%;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .results {
+            width: 65%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background-color: #ffffff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .result-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .result {
+            margin-top: 15px;
+            font-weight: bold;
+            background-color: #e9ecef;
+            padding: 0px;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .image-section {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 20px;
+            color: rgb(0, 91, 172);
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .question select, .question input[type="checkbox"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-container label {
+            margin-bottom: 0;
+            margin-right: 10px;
+        }
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            background-color: rgb(0, 153, 68);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .button-container button:hover {
+            background-color: rgb(182, 213, 95);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid rgb(0, 153, 68);
+            width: 80%;
+            max-width: 1200px;
+            border-radius: 10px;
+        }
+        .close {
+            color: rgb(0, 153, 68);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: rgb(182, 213, 95);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .signature {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5em;
+            text-align: right;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, rgb(0, 91, 172), rgb(182, 213, 95));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 100px; /* ロゴの幅を調整 */
+            height: auto; /* アスペクト比を維持 */
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+</head>
+<body>
+    <div class="splash-screen" id="splashScreen">
+        <img id="splashImage" src="images/background.png" alt="Background Image">
+    </div>
+    <div class="container" id="mainContent">
+        <div class="questions">
+            <div style="text-align: center;">
+                <img src="images/logo.png" alt="Logo" class="logo">
+                <h1 class="gradient-text">XR-9000構成アプリケーション Osaka Branch ver</h1>
+            </div>
+            <div class="section-title">1-1 XRモジュール台数</div>
+            <div class="question">
+                <label for="q1">1. 1日の検体数は？</label>
+                <select id="q1">
+                    <option value="600-800">600~800件未満/日</option>
+                    <option value="800-1000">800~1000件未満/日</option>
+                    <option value="1000-1200">1000~1200件未満/日</option>
+                    <option value="1200-1400">1200~1400件未満/日</option>
+                </select>
+            </div>
+            <div class="question">
+                <label for="q2">2. 1時間当たりの最大検体数は？</label>
+                <select id="q2">
+                    <option value="100">最大100件/時以上</option>
+                    <option value="200">最大200件/時以上</option>
+                    <option value="300">最大300件/時以上</option>
+                    <option value="400">最大400件/時以上</option>
+                    <option value="500">最大500件/時以上</option>
+                </select>
+            </div>
+
+            <div class="section-title">1-2 ツイン/シングルモジュールの選択</div>
+            <div class="question">
+                <label for="q3">3. 別号機再検の希望は？</label>
+                <select id="q3">
+                    <option value="あり">あり</option>
+                    <option value="なし">なし</option>
+                </select>
+            </div>
+            <div class="question">
+                <label for="q4">4. 必要なXRモジュール数は？</label>
+                <select id="q4">
+                    <option value="偶数">偶数台数</option>
+                    <option value="奇数">奇数台数</option>
+                </select>
+            </div>
+
+            <div class="section-title">1-3 濃縮試薬(RU)の選択</div>
+            <div class="checkbox-container">
+                <label for="q5-1">5. セルパックの交換頻度を減らしたい</label>
+                <input type="checkbox" id="q5-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q6-1">6. セルパックの在庫スペースを削減したい</label>
+                <input type="checkbox" id="q6-1">
+            </div>
+
+            <div class="section-title">1-4 オプションチャンネルの有無</div>
+            <div class="checkbox-container">
+                <label for="q7-1">7. 造血幹細胞移植をしている</label>
+                <input type="checkbox" id="q7-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q8-1">8. IPメッセージ「Blasts/Abn Lympho?」の精査をしたい</label>
+                <input type="checkbox" id="q8-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q9-1">9. IPFの臨床要望がある</label>
+                <input type="checkbox" id="q9-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q10-1">10. PLT 5万以下の検体数が多い</label>
+                <input type="checkbox" id="q10-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q11-1">11. 破砕赤血球の出現検体が時々ある</label>
+                <input type="checkbox" id="q11-1">
+            </div>
+
+            <div class="section-title">1-5 体液の機械値報告をしたい</div>
+            <div class="checkbox-container">
+                <label for="q12-1">12. 体液の機械値報告をしたい</label>
+                <input type="checkbox" id="q12-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q13-1">13. 当直帯に体液検体の報告が必要</label>
+                <input type="checkbox" id="q13-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q14-1">14. 体液の鏡検者の不足またはスキル継続に課題がある</label>
+                <input type="checkbox" id="q14-1">
+            </div>
+
+            <div class="section-title">2-1 SP-50の台数</div>
+            <div class="question">
+                <label for="q15">15. 標本枚数/日は？</label>
+                <select id="q15">
+                    <option value="150未満">150枚未満/日</option>
+                    <option value="150以上">150枚以上/日</option>
+                </select>
+            </div>
+
+            <div class="section-title">3-1 DI-60の有無</div>
+            <div class="question">
+                <label for="q16">16. 現在、血液像自動分析装置の有無は？</label>
+                <select id="q16">
+                    <option value="なし">なし</option>
+                    <option value="あり">あり</option>
+                </select>
+            </div>
+            <div class="checkbox-container">
+                <label for="q17-1">17. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい</label>
+                <input type="checkbox" id="q17-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q18-1">18. 検査室内での鏡検スキルの平準化を進めたい</label>
+                <input type="checkbox" id="q18-1">
+            </div>
+
+            <div class="section-title">4-1 TS-10の位置(先頭, 真ん中, 最後尾)</div>
+            <div class="question">
+                <label for="q19">19. SPないしDIが複数台数あるか？</label>
+                <select id="q19">
+                    <option value="なし">なし</option>
+                    <option value="あり">あり</option>
+                </select>
+            </div>
+            <div class="question">
+                <label for="q20">20. 設置面積をできる限り狭くしたいか？</label>
+                <select id="q20">
+                    <option value="なし">なし</option>
+                    <option value="あり">あり</option>
+                </select>
+            </div>
+            <div class="question">
+                <label for="q21">21. TS-10の検体回収作業を端で行いたいか？</label>
+                <select id="q21">
+                    <option value="なし">なし</option>
+                    <option value="あり">あり</option>
+                </select>
+            </div>
+
+            <div class="section-title">5-1 血液・凝固検査の効率化</div>
+            <div class="checkbox-container">
+                <label for="q22-1">22. 血液・凝固検査を含めた自動化を進めたい</label>
+                <input type="checkbox" id="q22-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q23-1">23. 血液・凝固検査の担当人員を減らしたい</label>
+                <input type="checkbox" id="q23-1">
+            </div>
+            <div class="checkbox-container">
+                <label for="q24-1">24. 夜間当直帯の装置オペレーションを少なくしたい</label>
+                <input type="checkbox" id="q24-1">
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="button-container">
+                <button onclick="calculateResult()">結果を表示</button>
+                <button onclick="openModal()">拡大表示</button>
+            </div>
+            <div class="result-section">
+                <h3>ご提案構成イメージ</h3>
+                <h4>※ST-40、ST-41の配置は参考です。</h4>
+                <div class="result" id="result"></div>
+            </div>
+            <div class="image-section">
+                <img id="patternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="result-section">
+                <h2>ご提案構成イメージ</h2>
+                <h4>※ST-40、ST-41の配置は参考です。</h4>
+                <div class="result" id="modalResult"></div>
+            </div>
+            <div class="image-section">
+                <img id="modalPatternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
+            </div>
+            <div class="button-container" id="pdfButtonContainer">
+               <!--  <button onclick="saveAsPDF()">PDFで保存</button> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateResult() {
+            const q1 = document.getElementById('q1').value;
+            const q2 = document.getElementById('q2').value;
+            const q3 = document.getElementById('q3').value;
+            const q4 = document.getElementById('q4').value;
+            const q5 = document.getElementById('q5-1').checked;
+            const q6 = document.getElementById('q6-1').checked;
+            const q7 = document.getElementById('q7-1').checked;
+            const q8 = document.getElementById('q8-1').checked;
+            const q9 = document.getElementById('q9-1').checked;
+            const q10 = document.getElementById('q10-1').checked;
+            const q11 = document.getElementById('q11-1').checked;
+            const q12 = document.getElementById('q12-1').checked;
+            const q13 = document.getElementById('q13-1').checked;
+            const q14 = document.getElementById('q14-1').checked;
+            const q15 = document.getElementById('q15').value;
+            const q16 = document.getElementById('q16').value;
+            const q17 = document.getElementById('q17-1').checked;
+            const q18 = document.getElementById('q18-1').checked;
+            const q19 = document.getElementById('q19').value;
+            const q20 = document.getElementById('q20').value;
+            const q21 = document.getElementById('q21').value;
+            const q22 = document.getElementById('q22-1').checked;
+            const q23 = document.getElementById('q23-1').checked;
+            const q24 = document.getElementById('q24-1').checked;
+
+let xrCount1;
+let xrCount2;
+
+switch (q1) {
+    case '600-800':
+        xrCount1 = 3;
+        break;
+    case '800-1000':
+        xrCount1 = 4;
+        break;
+    case '1000-1200':
+        xrCount1 = 5;
+        break;
+    case '1200-1400':
+        xrCount1 = 6;
+        break;
+}
+
+switch (q2) {
+    case '100':
+        xrCount2 = 2;
+        break;
+    case '200':
+        xrCount2 = 3;
+        break;
+    case '300':
+        xrCount2 = 4;
+        break;
+    case '400':
+        xrCount2 = 5;
+        break;
+    case '500':
+        xrCount2 = 6;
+        break;
+}
+
+const xrCount = Math.max(xrCount1, xrCount2);
+
+let moduleType;
+if (q3 === 'あり' && xrCount % 2 === 0) {
+    moduleType = 'ツインモジュール';
+} else {
+    moduleType = 'シングルモジュール';
+}
+
+let ru = (q5 || q6) ? 'RUあり' : 'RUなし';
+let wpc = (q7 || q8) ? 'WPCチャンネルあり(XR-20)' : 'WPCチャンネルなし(XR-10)';
+let pltF = (q9 || q10 || q11) ? 'PLT-Fチャンネルあり' : 'PLT-Fチャンネルなし';
+let bf = (q12 || q13 || q14) ? 'BFモードあり' : 'BFモードなし';
+
+let sp50 = (q15 === '150未満') ? 'SP-50 1台' : 'SP-50 2台';
+let di60 = (q16 === 'あり' || q17 || q18) ? 'DI-60あり' : 'DI-60なし';
+
+let ts10;
+if (q21 === 'あり') {
+    ts10 = 'TS-10最後尾配置';
+} else {
+    ts10 = 'TS-10中央配置';
+}
+
+let bloodScience = (q22 || q23 || q24) ? 'BloodScience Workcellの提案' : 'BloodScience Workcellなし';
+
+// 最終構成パターン図番号の計算
+let patternNumber = 0;
+if (xrCount === 2) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 1 : 2;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 3 : 4;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 5 : 6;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 7 : 8;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 9 : 10;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 11 : 12;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 13 : 14;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 15 : 16;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 17 : 18;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 19 : 20;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 21 : 22;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 23 : 24;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 25 : 26;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 27 : 28;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 29 : 30;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 31 : 32;
+                }
+            }
+        }
+    }
+} else if (xrCount === 4) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 33 : 34;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 35 : 36;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 37 : 38;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 39 : 40;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 41 : 42;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 43 : 44;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 45 : 46;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 47 : 48;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 49 : 50;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 51 : 52;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 53 : 54;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 55 : 56;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 57 : 58;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 59 : 60;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 61 : 62;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 63 : 64;
+                }
+            }
+        }
+    }
+} else if (xrCount === 6) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 65 : 66;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 67 : 68;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 69 : 70;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 71 : 72;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 73 : 74;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 75 : 76;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 77 : 78;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 79 : 80;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 81 : 82;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 83 : 84;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 85 : 86;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 87 : 88;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 89 : 90;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 91 : 92;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 93 : 94;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 95 : 96;
+                }
+            }
+        }
+    }
+} else if (xrCount === 3) {
+    if (moduleType === 'シングルモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 97 : 98;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 99 : 100;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 101 : 102;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 103 : 104;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 105 : 106;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 107 : 108;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 109 : 110;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 111 : 112;
+                }
+            }
+        }
+    }
+} else if (xrCount === 5) {
+    if (moduleType === 'シングルモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 113 : 114;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 115 : 116;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 117 : 118;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 119 : 120;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 121 : 122;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 123 : 124;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 125 : 126;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 127 : 128;
+                }
+            }
+        }
+    }
+}
+
+document.getElementById('result').innerText = `
+    XRモジュール台数: ${xrCount}台
+    モジュールタイプ: ${moduleType}
+    濃縮試薬(RU): ${ru}
+    WPCチャンネル: ${wpc}
+    PLT-Fチャンネル: ${pltF}
+    BFモード: ${bf}
+    SP-50数: ${sp50}
+    DI-60: ${di60}
+    TS-10の位置: ${ts10}
+    BloodScience Workcell: ${bloodScience}
+    最終構成パターン図番号: ${patternNumber}
+`;
+
+// パターン番号に応じた画像の表示
+const patternImage = document.getElementById('patternImage');
+patternImage.src = `images/pattern${patternNumber}.png`; // 画像のパスを適宜変更してください
+patternImage.alt = `構成パターン図 ${patternNumber}`;
+
+// モーダル用の結果も更新
+document.getElementById('modalResult').innerText = document.getElementById('result').innerText;
+const modalPatternImage = document.getElementById('modalPatternImage');
+modalPatternImage.src = patternImage.src;
+modalPatternImage.alt = patternImage.alt;
+}
+
+function openModal() {
+calculateResult();
+document.getElementById('resultModal').style.display = "block";
+}
+
+function closeModal() {
+document.getElementById('resultModal').style.display = "none";
+}
+
+// モーダル外をクリックしたときにモーダルを閉じる
+window.onclick = function(event) {
+const modal = document.getElementById('resultModal');
+if (event.target === modal) {
+    modal.style.display = "none";
+}
+}
+
+// PDF保存機能
+function saveAsPDF() {
+const pdfButtonContainer = document.getElementById('pdfButtonContainer');
+const closeButton = document.querySelector('.close');
+const modalContent = document.querySelector('.modal-content');
+
+// PDF保存ボタンと×ボタンを非表示にする
+pdfButtonContainer.style.display = 'none';
+closeButton.style.display = 'none';
+
+// 枠線を非表示にする
+modalContent.style.border = 'none';
+
+// 高解像度のキャンバスを生成するためのオプション
+const options = {
+    scale: 1, // 解像度を2倍にする
+    useCORS: true // クロスオリジンの画像を使用する場合に必要
+};
+
+// 画像の読み込みが完了してからPDFを生成する
+const patternImage = document.getElementById('patternImage');
+if (patternImage.complete) {
+    generatePDF();
+} else {
+    patternImage.onload = generatePDF;
+    patternImage.onerror = function() {
+        console.error('Error loading image');
+        // PDF保存ボタンと×ボタンを再表示する
+        pdfButtonContainer.style.display = 'block';
+        closeButton.style.display = 'block';
+
+        // 枠線を再表示する
+        modalContent.style.border = '1px solid #888';
+    };
+}
+
+function generatePDF() {
+    html2canvas(modalContent, options).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
+        const imgWidth = 297; // A4の横幅
+        const pageHeight = 210; // A4の縦高さ
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        // 現在の日時を取得してフォーマット
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const                    day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+
+                    // ファイル名に日時を含める
+                    pdf.save(`構成提案_${formattedDate}.pdf`);
+
+                    // PDF保存ボタンと×ボタンを再表示する
+                    pdfButtonContainer.style.display = 'block';
+                    closeButton.style.display = 'block';
+
+                    // 枠線を再表示する
+                    modalContent.style.border = '1px solid #888';
+                }).catch(error => {
+                    console.error('Error generating PDF:', error);
+                    // PDF保存ボタンと×ボタンを再表示する
+                    pdfButtonContainer.style.display = 'block';
+                    closeButton.style.display = 'block';
+
+                    // 枠線を再表示する
+                    modalContent.style.border = '1px solid #888';
+                });
+            }
+        }
+
+        // スプラッシュスクリーンの表示と切り替え
+        window.onload = function() {
+            const splashScreen = document.getElementById('splashScreen');
+            const mainContent = document.getElementById('mainContent');
+
+            // 画像を5秒間表示
+            setTimeout(() => {
+                splashScreen.style.opacity = '0'; // フェードアウト開始
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    mainContent.style.display = 'flex';
+                }, 1000); // フェードアウトの時間と一致させる
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
