@@ -43,6 +43,21 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
+        .question input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box; /* パディングとボーダーを含めた幅調整 */
+            appearance: textfield; /* スピナーを削除する（ブラウザ依存） */
+        }
+
+        .question input[type="number"]::-webkit-outer-spin-button,
+        .question input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0; /* Webkitブラウザのスピナーを非表示 */
+        }
         .results {
             width: 65%;
             padding: 20px;
