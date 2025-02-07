@@ -141,7 +141,7 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
@@ -187,6 +187,31 @@
             left: 10px;
             width: 100px; /* ロゴの幅を調整 */
             height: auto; /* アスペクト比を維持 */
+        }
+        /* Vimeo埋め込みのスタイル */
+        .video-section {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .video-section iframe {
+            width: 100%;
+            height: 360px;
+            border: none;
+            border-radius: 8px;
+        }
+        /* エクスポート用のスタイル */
+        .export-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .export-select {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #fff;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
@@ -349,6 +374,18 @@
             <div class="image-section">
                 <img id="patternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
             </div>
+            <!-- Vimeo動画を表示する領域 -->
+            <div class="video-section" id="videoContainer"></div>
+            <!-- エクスポートの種類選択 -->
+            <div class="export-container">
+                <label for="exportSelect">エクスポート形式:</label>
+                <select class="export-select" id="exportSelect">
+                    <option value="csv">CSV</option>
+                    <option value="txt">Text</option>
+                    <option value="xls">Excel</option>
+                </select>
+                <button onclick="exportResult()">エクスポート</button>
+            </div>
         </div>
     </div>
 
@@ -364,7 +401,7 @@
                 <img id="modalPatternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
             </div>
             <div class="button-container" id="pdfButtonContainer">
-               <!--  <button onclick="saveAsPDF()">PDFで保存</button> -->
+               <button onclick="saveAsPDF()">PDFで保存</button>
             </div>
         </div>
     </div>
@@ -702,24 +739,21 @@ if (xrCount === 2) {
     }
 }
 
-document.getElementById('result').innerText = `
-    XRモジュール台数: ${xrCount}台
-    モジュールタイプ: ${moduleType}
-    濃縮試薬(RU): ${ru}
-    WPCチャンネル: ${wpc}
-    PLT-Fチャンネル: ${pltF}
-    BFモード: ${bf}
-    SP-50数: ${sp50}
-    DI-60: ${di60}
-    TS-10の位置: ${ts10}
-    BloodScience Workcell: ${bloodScience}
-    最終構成パターン図番号: ${patternNumber}
-`;
+document.getElementById('result').innerText = `\n    XRモジュール台数: ${xrCount}台\n    モジュールタイプ: ${moduleType}\n    濃縮試薬(RU): ${ru}\n    WPCチャンネル: ${wpc}\n    PLT-Fチャンネル: ${pltF}\n    BFモード: ${bf}\n    SP-50数: ${sp50}\n    DI-60: ${di60}\n    TS-10の位置: ${ts10}\n    BloodScience Workcell: ${bloodScience}\n    最終構成パターン図番号: ${patternNumber}\n`;
 
 // パターン番号に応じた画像の表示
 const patternImage = document.getElementById('patternImage');
 patternImage.src = `images/pattern${patternNumber}.png`; // 画像のパスを適宜変更してください
 patternImage.alt = `構成パターン図 ${patternNumber}`;
+
+// 動画の埋め込み処理
+const videoContainer = document.getElementById('videoContainer');
+if (q22 || q23 || q24) {
+    // BloodScience Workcellに関する動画を表示
+    videoContainer.innerHTML = `\n      <iframe src="https://player.vimeo.com/video/843146377"\n              frameborder="0" allow="autoplay; fullscreen; picture-in-picture"\n              allowfullscreen></iframe>`;
+} else {
+    videoContainer.innerHTML = "";
+}
 
 // モーダル用の結果も更新
 document.getElementById('modalResult').innerText = document.getElementById('result').innerText;
@@ -729,123 +763,232 @@ modalPatternImage.alt = patternImage.alt;
 }
 
 function openModal() {
-calculateResult();
-document.getElementById('resultModal').style.display = "block";
+    calculateResult();
+    document.getElementById('resultModal').style.display = "block";
 }
 
 function closeModal() {
-document.getElementById('resultModal').style.display = "none";
+    document.getElementById('resultModal').style.display = "none";
 }
 
 // モーダル外をクリックしたときにモーダルを閉じる
 window.onclick = function(event) {
-const modal = document.getElementById('resultModal');
-if (event.target === modal) {
-    modal.style.display = "none";
-}
+    const modal = document.getElementById('resultModal');
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
 }
 
 // PDF保存機能
 function saveAsPDF() {
-const pdfButtonContainer = document.getElementById('pdfButtonContainer');
-const closeButton = document.querySelector('.close');
-const modalContent = document.querySelector('.modal-content');
+    const pdfButtonContainer = document.getElementById('pdfButtonContainer');
+    const closeButton = document.querySelector('.close');
+    const modalContent = document.querySelector('.modal-content');
 
-// PDF保存ボタンと×ボタンを非表示にする
-pdfButtonContainer.style.display = 'none';
-closeButton.style.display = 'none';
+    // PDF保存ボタンと×ボタンを非表示にする
+    pdfButtonContainer.style.display = 'none';
+    closeButton.style.display = 'none';
 
-// 枠線を非表示にする
-modalContent.style.border = 'none';
+    // 枠線を非表示にする
+    modalContent.style.border = 'none';
 
-// 高解像度のキャンバスを生成するためのオプション
-const options = {
-    scale: 1, // 解像度を2倍にする
-    useCORS: true // クロスオリジンの画像を使用する場合に必要
-};
-
-// 画像の読み込みが完了してからPDFを生成する
-const patternImage = document.getElementById('patternImage');
-if (patternImage.complete) {
-    generatePDF();
-} else {
-    patternImage.onload = generatePDF;
-    patternImage.onerror = function() {
-        console.error('Error loading image');
-        // PDF保存ボタンと×ボタンを再表示する
-        pdfButtonContainer.style.display = 'block';
-        closeButton.style.display = 'block';
-
-        // 枠線を再表示する
-        modalContent.style.border = '1px solid #888';
+    // 高解像度のキャンバスを生成するためのオプション
+    const options = {
+        scale: 1, // 解像度を2倍にする
+        useCORS: true // クロスオリジンの画像を使用する場合に必要
     };
-}
 
-function generatePDF() {
-    html2canvas(modalContent, options).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
-        const imgWidth = 297; // A4の横幅
-        const pageHeight = 210; // A4の縦高さ
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+    // 画像の読み込みが完了してからPDFを生成する
+    const patternImage = document.getElementById('patternImage');
+    if (patternImage.complete) {
+        generatePDF();
+    } else {
+        patternImage.onload = generatePDF;
+        patternImage.onerror = function() {
+            console.error('Error loading image');
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        };
+    }
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
+    function generatePDF() {
+        html2canvas(modalContent, options).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
+            const imgWidth = 297; // A4の横幅
+            const pageHeight = 210; // A4の縦高さ
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
-        }
 
-        // 現在の日時を取得してフォーマット
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const                    day = String(now.getDate()).padStart(2, '0');
-                    const hours = String(now.getHours()).padStart(2, '0');
-                    const minutes = String(now.getMinutes()).padStart(2, '0');
-                    const seconds = String(now.getSeconds()).padStart(2, '0');
-                    const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
 
-                    // ファイル名に日時を含める
-                    pdf.save(`構成提案_${formattedDate}.pdf`);
+            // 現在の日時を取得してフォーマット
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
 
-                    // PDF保存ボタンと×ボタンを再表示する
-                    pdfButtonContainer.style.display = 'block';
-                    closeButton.style.display = 'block';
+            // ファイル名に日時を含める
+            pdf.save(`構成提案_${formattedDate}.pdf`);
 
-                    // 枠線を再表示する
-                    modalContent.style.border = '1px solid #888';
-                }).catch(error => {
-                    console.error('Error generating PDF:', error);
-                    // PDF保存ボタンと×ボタンを再表示する
-                    pdfButtonContainer.style.display = 'block';
-                    closeButton.style.display = 'block';
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
 
-                    // 枠線を再表示する
-                    modalContent.style.border = '1px solid #888';
-                });
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        }).catch(error => {
+            console.error('Error generating PDF:', error);
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
+
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        });
+    }
+}
+
+// エクスポート機能（csv, text, xls）
+function exportResult() {
+    // 事前に最新の計算結果を出しておく
+    calculateResult();
+
+    const exportFormat = document.getElementById('exportSelect').value; // csv | txt | xls
+    const resultText = document.getElementById('result').innerText.trim();
+
+    switch (exportFormat) {
+        case 'csv':
+            exportAsCSV(resultText);
+            break;
+        case 'txt':
+            exportAsText(resultText);
+            break;
+        case 'xls':
+            exportAsExcel(resultText);
+            break;
+        default:
+            alert('エクスポート形式を選択してください');
+            break;
+    }
+}
+
+// CSVエクスポート
+function exportAsCSV(text) {
+    // 行を分割
+    const lines = text.split('\n');
+    let csvLines = [];
+
+    // 各行が "キー: 値" という形式を想定し、カンマ区切りに変換
+    for (let line of lines) {
+        let trimmed = line.trim();
+        if (trimmed) {
+            // コロンで分割
+            const parts = trimmed.split(':');
+            if (parts.length === 2) {
+                const key = parts[0].trim().replace(/\s/g, ' ');
+                const val = parts[1].trim().replace(/\s/g, ' ');
+                csvLines.push(`"${key}","${val}"`);
+            } else {
+                // コロンが見つからない場合はそのまま
+                csvLines.push(`"${trimmed}"`);
             }
         }
+    }
 
-        // スプラッシュスクリーンの表示と切り替え
-        window.onload = function() {
-            const splashScreen = document.getElementById('splashScreen');
-            const mainContent = document.getElementById('mainContent');
+    const csvContent = csvLines.join('\n');
 
-            // 画像を5秒間表示
-            setTimeout(() => {
-                splashScreen.style.opacity = '0'; // フェードアウト開始
-                setTimeout(() => {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'flex';
-                }, 500); // フェードアウトの時間と一致させる
-            }, 2000);
+    // Blobを作成
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロード用リンクを作成してクリック
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Textエクスポート
+function exportAsText(text) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Excelエクスポート（簡易：HTMLテーブルをXLSファイルとして保存）
+function exportAsExcel(text) {
+    const lines = text.split('\n');
+    let tableHTML = '<table border="1"><tbody>';
+
+    for (let line of lines) {
+        let trimmed = line.trim();
+        if (trimmed) {
+            const parts = trimmed.split(':');
+            if (parts.length === 2) {
+                const key = parts[0].trim();
+                const val = parts[1].trim();
+                tableHTML += `<tr><td>${key}</td><td>${val}</td></tr>`;
+            } else {
+                // コロンが見つからない場合は一つのセルに
+                tableHTML += `<tr><td colspan="2">${trimmed}</td></tr>`;
+            }
         }
+    }
+
+    tableHTML += '</tbody></table>';
+
+    // Excel用にBlobを生成
+    const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// スプラッシュスクリーンの表示と切り替え
+window.onload = function() {
+    const splashScreen = document.getElementById('splashScreen');
+    const mainContent = document.getElementById('mainContent');
+
+    // 画像を5秒間表示
+    setTimeout(() => {
+        splashScreen.style.opacity = '0'; // フェードアウト開始
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+            mainContent.style.display = 'flex';
+        }, 500); // フェードアウトの時間と一致させる
+    }, 2000);
+}
     </script>
 </body>
 </html>
