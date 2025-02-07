@@ -794,22 +794,23 @@ function saveAsPDF() {
 
     // 高解像度のキャンバスを生成するためのオプション
     const options = {
-        scale: 1, // 解像度を2倍にする
-        useCORS: true // クロスオリジンの画像を使用する場合に必要
-    };
+    scale: 1, // 適度な解像度
+    // useCORS: true, // ← 一旦OFFに
+    allowTaint: true // 同一ドメイン以外の画像があってもキャプチャできるように
+};
 
-    // 画像の読み込みが完了してからPDFを生成する
-    const patternImage = document.getElementById('patternImage');
-    if (patternImage.complete) {
+    // モーダル画像の読み込み完了を待つ
+    const modalPatternImage = document.getElementById('modalPatternImage');
+
+    if (modalPatternImage.complete) {
         generatePDF();
     } else {
-        patternImage.onload = generatePDF;
-        patternImage.onerror = function() {
+        modalPatternImage.onload = generatePDF;
+        modalPatternImage.onerror = function() {
             console.error('Error loading image');
             // PDF保存ボタンと×ボタンを再表示する
             pdfButtonContainer.style.display = 'block';
             closeButton.style.display = 'block';
-
             // 枠線を再表示する
             modalContent.style.border = '1px solid #888';
         };
