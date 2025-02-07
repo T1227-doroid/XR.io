@@ -43,6 +43,21 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
+        .question input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box; /* パディングとボーダーを含めた幅調整 */
+            appearance: textfield; /* スピナーを削除する（ブラウザ依存） */
+        }
+
+        .question input[type="number"]::-webkit-outer-spin-button,
+        .question input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0; /* Webkitブラウザのスピナーを非表示 */
+        }
         .results {
             width: 65%;
             padding: 20px;
@@ -126,7 +141,7 @@
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
@@ -173,6 +188,31 @@
             width: 100px; /* ロゴの幅を調整 */
             height: auto; /* アスペクト比を維持 */
         }
+        /* Vimeo埋め込みのスタイル */
+        .video-section {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .video-section iframe {
+            width: 100%;
+            height: 360px;
+            border: none;
+            border-radius: 8px;
+        }
+        /* エクスポート用のスタイル */
+        .export-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .export-select {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #fff;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
@@ -191,22 +231,11 @@
             <div class="section-title">1-1 XRモジュール台数</div>
             <div class="question">
                 <label for="q1">1. 1日の検体数は？</label>
-                <select id="q1">
-                    <option value="600-800">600~800件未満/日</option>
-                    <option value="800-1000">800~1000件未満/日</option>
-                    <option value="1000-1200">1000~1200件未満/日</option>
-                    <option value="1200-1400">1200~1400件未満/日</option>
-                </select>
+                <input type="number" id="q1" min="0" placeholder="例: 800">
             </div>
             <div class="question">
                 <label for="q2">2. 1時間当たりの最大検体数は？</label>
-                <select id="q2">
-                    <option value="100">最大100件/時以上</option>
-                    <option value="200">最大200件/時以上</option>
-                    <option value="300">最大300件/時以上</option>
-                    <option value="400">最大400件/時以上</option>
-                    <option value="500">最大500件/時以上</option>
-                </select>
+                <input type="number" id="q2" min="0" placeholder="例: 100">
             </div>
 
             <div class="section-title">1-2 ツイン/シングルモジュールの選択</div>
@@ -217,13 +246,13 @@
                     <option value="なし">なし</option>
                 </select>
             </div>
-            <div class="question">
+<!--             <div class="question">
                 <label for="q4">4. 必要なXRモジュール数は？</label>
                 <select id="q4">
                     <option value="偶数">偶数台数</option>
                     <option value="奇数">奇数台数</option>
                 </select>
-            </div>
+            </div> -->
 
             <div class="section-title">1-3 濃縮試薬(RU)の選択</div>
             <div class="checkbox-container">
@@ -274,10 +303,7 @@
             <div class="section-title">2-1 SP-50の台数</div>
             <div class="question">
                 <label for="q15">15. 標本枚数/日は？</label>
-                <select id="q15">
-                    <option value="150未満">150枚未満/日</option>
-                    <option value="150以上">150枚以上/日</option>
-                </select>
+                <input type="number" id="q15" min="0" placeholder="例: 150">
             </div>
 
             <div class="section-title">3-1 DI-60の有無</div>
@@ -348,6 +374,18 @@
             <div class="image-section">
                 <img id="patternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
             </div>
+            <!-- Vimeo動画を表示する領域 -->
+            <div class="video-section" id="videoContainer"></div>
+            <!-- エクスポートの種類選択 -->
+            <div class="export-container">
+                <label for="exportSelect">エクスポート形式:</label>
+                <select class="export-select" id="exportSelect">
+                    <option value="csv">CSV</option>
+                    <option value="txt">Text</option>
+                    <option value="xls">Excel</option>
+                </select>
+                <button onclick="exportResult()">エクスポート</button>
+            </div>
         </div>
     </div>
 
@@ -363,17 +401,17 @@
                 <img id="modalPatternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
             </div>
             <div class="button-container" id="pdfButtonContainer">
-               <!--  <button onclick="saveAsPDF()">PDFで保存</button> -->
+               <button onclick="saveAsPDF()">PDFで保存</button>
             </div>
         </div>
     </div>
 
     <script>
         function calculateResult() {
-            const q1 = document.getElementById('q1').value;
-            const q2 = document.getElementById('q2').value;
+            const q1 = parseInt(document.getElementById('q1').value) || 0;
+            const q2 = parseInt(document.getElementById('q2').value) || 0;
             const q3 = document.getElementById('q3').value;
-            const q4 = document.getElementById('q4').value;
+            //const q4 = document.getElementById('q4').value;
             const q5 = document.getElementById('q5-1').checked;
             const q6 = document.getElementById('q6-1').checked;
             const q7 = document.getElementById('q7-1').checked;
@@ -384,7 +422,7 @@
             const q12 = document.getElementById('q12-1').checked;
             const q13 = document.getElementById('q13-1').checked;
             const q14 = document.getElementById('q14-1').checked;
-            const q15 = document.getElementById('q15').value;
+            const q15 = parseInt(document.getElementById('q15').value) || 0;
             const q16 = document.getElementById('q16').value;
             const q17 = document.getElementById('q17-1').checked;
             const q18 = document.getElementById('q18-1').checked;
@@ -395,43 +433,33 @@
             const q23 = document.getElementById('q23-1').checked;
             const q24 = document.getElementById('q24-1').checked;
 
-let xrCount1;
-let xrCount2;
+            let xrCount1;
+            if (q1 >= 1200) {
+                xrCount1 = 6;
+            } else if (q1 >= 1000) {
+                xrCount1 = 5;
+            } else if (q1 >= 800) {
+                xrCount1 = 4;
+            } else if (q1 >= 600) {
+                xrCount1 = 3;
+            } else {
+                xrCount1 = 2;
+            }
 
-switch (q1) {
-    case '600-800':
-        xrCount1 = 3;
-        break;
-    case '800-1000':
-        xrCount1 = 4;
-        break;
-    case '1000-1200':
-        xrCount1 = 5;
-        break;
-    case '1200-1400':
-        xrCount1 = 6;
-        break;
-}
+            let xrCount2;
+            if (q2 >= 400) {
+                xrCount2 = 5;
+            } else if (q2 >= 300) {
+                xrCount2 = 4;
+            } else if (q2 >= 200) {
+                xrCount2 = 3;
+            } else if (q2 >= 100) {
+                xrCount2 = 2;
+            } else {
+                xrCount2 = 1;
+            }
 
-switch (q2) {
-    case '100':
-        xrCount2 = 2;
-        break;
-    case '200':
-        xrCount2 = 3;
-        break;
-    case '300':
-        xrCount2 = 4;
-        break;
-    case '400':
-        xrCount2 = 5;
-        break;
-    case '500':
-        xrCount2 = 6;
-        break;
-}
-
-const xrCount = Math.max(xrCount1, xrCount2);
+            const xrCount = Math.max(xrCount1, xrCount2);
 
 let moduleType;
 if (q3 === 'あり' && xrCount % 2 === 0) {
@@ -445,7 +473,7 @@ let wpc = (q7 || q8) ? 'WPCチャンネルあり(XR-20)' : 'WPCチャンネル�
 let pltF = (q9 || q10 || q11) ? 'PLT-Fチャンネルあり' : 'PLT-Fチャンネルなし';
 let bf = (q12 || q13 || q14) ? 'BFモードあり' : 'BFモードなし';
 
-let sp50 = (q15 === '150未満') ? 'SP-50 1台' : 'SP-50 2台';
+let sp50 = (q15 < 150) ? 'SP-50 1台' : 'SP-50 2台';
 let di60 = (q16 === 'あり' || q17 || q18) ? 'DI-60あり' : 'DI-60なし';
 
 let ts10;
@@ -711,24 +739,21 @@ if (xrCount === 2) {
     }
 }
 
-document.getElementById('result').innerText = `
-    XRモジュール台数: ${xrCount}台
-    モジュールタイプ: ${moduleType}
-    濃縮試薬(RU): ${ru}
-    WPCチャンネル: ${wpc}
-    PLT-Fチャンネル: ${pltF}
-    BFモード: ${bf}
-    SP-50数: ${sp50}
-    DI-60: ${di60}
-    TS-10の位置: ${ts10}
-    BloodScience Workcell: ${bloodScience}
-    最終構成パターン図番号: ${patternNumber}
-`;
+document.getElementById('result').innerText = `\n    XRモジュール台数: ${xrCount}台\n    モジュールタイプ: ${moduleType}\n    濃縮試薬(RU): ${ru}\n    WPCチャンネル: ${wpc}\n    PLT-Fチャンネル: ${pltF}\n    BFモード: ${bf}\n    SP-50数: ${sp50}\n    DI-60: ${di60}\n    TS-10の位置: ${ts10}\n    BloodScience Workcell: ${bloodScience}\n    最終構成パターン図番号: ${patternNumber}\n`;
 
 // パターン番号に応じた画像の表示
 const patternImage = document.getElementById('patternImage');
 patternImage.src = `images/pattern${patternNumber}.png`; // 画像のパスを適宜変更してください
 patternImage.alt = `構成パターン図 ${patternNumber}`;
+
+// 動画の埋め込み処理
+const videoContainer = document.getElementById('videoContainer');
+if (q22 || q23 || q24) {
+    // BloodScience Workcellに関する動画を表示
+    videoContainer.innerHTML = `\n      <iframe src="https://player.vimeo.com/video/843146377"\n              frameborder="0" allow="autoplay; fullscreen; picture-in-picture"\n              allowfullscreen></iframe>`;
+} else {
+    videoContainer.innerHTML = "";
+}
 
 // モーダル用の結果も更新
 document.getElementById('modalResult').innerText = document.getElementById('result').innerText;
@@ -738,123 +763,232 @@ modalPatternImage.alt = patternImage.alt;
 }
 
 function openModal() {
-calculateResult();
-document.getElementById('resultModal').style.display = "block";
+    calculateResult();
+    document.getElementById('resultModal').style.display = "block";
 }
 
 function closeModal() {
-document.getElementById('resultModal').style.display = "none";
+    document.getElementById('resultModal').style.display = "none";
 }
 
 // モーダル外をクリックしたときにモーダルを閉じる
 window.onclick = function(event) {
-const modal = document.getElementById('resultModal');
-if (event.target === modal) {
-    modal.style.display = "none";
-}
+    const modal = document.getElementById('resultModal');
+    if (event.target === modal) {
+        modal.style.display = "none";
+    }
 }
 
 // PDF保存機能
 function saveAsPDF() {
-const pdfButtonContainer = document.getElementById('pdfButtonContainer');
-const closeButton = document.querySelector('.close');
-const modalContent = document.querySelector('.modal-content');
+    const pdfButtonContainer = document.getElementById('pdfButtonContainer');
+    const closeButton = document.querySelector('.close');
+    const modalContent = document.querySelector('.modal-content');
 
-// PDF保存ボタンと×ボタンを非表示にする
-pdfButtonContainer.style.display = 'none';
-closeButton.style.display = 'none';
+    // PDF保存ボタンと×ボタンを非表示にする
+    pdfButtonContainer.style.display = 'none';
+    closeButton.style.display = 'none';
 
-// 枠線を非表示にする
-modalContent.style.border = 'none';
+    // 枠線を非表示にする
+    modalContent.style.border = 'none';
 
-// 高解像度のキャンバスを生成するためのオプション
-const options = {
-    scale: 1, // 解像度を2倍にする
-    useCORS: true // クロスオリジンの画像を使用する場合に必要
-};
-
-// 画像の読み込みが完了してからPDFを生成する
-const patternImage = document.getElementById('patternImage');
-if (patternImage.complete) {
-    generatePDF();
-} else {
-    patternImage.onload = generatePDF;
-    patternImage.onerror = function() {
-        console.error('Error loading image');
-        // PDF保存ボタンと×ボタンを再表示する
-        pdfButtonContainer.style.display = 'block';
-        closeButton.style.display = 'block';
-
-        // 枠線を再表示する
-        modalContent.style.border = '1px solid #888';
+    // 高解像度のキャンバスを生成するためのオプション
+    const options = {
+        scale: 1, // 解像度を2倍にする
+        useCORS: true // クロスオリジンの画像を使用する場合に必要
     };
-}
 
-function generatePDF() {
-    html2canvas(modalContent, options).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
-        const imgWidth = 297; // A4の横幅
-        const pageHeight = 210; // A4の縦高さ
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+    // 画像の読み込みが完了してからPDFを生成する
+    const patternImage = document.getElementById('patternImage');
+    if (patternImage.complete) {
+        generatePDF();
+    } else {
+        patternImage.onload = generatePDF;
+        patternImage.onerror = function() {
+            console.error('Error loading image');
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        };
+    }
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
+    function generatePDF() {
+        html2canvas(modalContent, options).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
+            const imgWidth = 297; // A4の横幅
+            const pageHeight = 210; // A4の縦高さ
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
-        }
 
-        // 現在の日時を取得してフォーマット
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const                    day = String(now.getDate()).padStart(2, '0');
-                    const hours = String(now.getHours()).padStart(2, '0');
-                    const minutes = String(now.getMinutes()).padStart(2, '0');
-                    const seconds = String(now.getSeconds()).padStart(2, '0');
-                    const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
 
-                    // ファイル名に日時を含める
-                    pdf.save(`構成提案_${formattedDate}.pdf`);
+            // 現在の日時を取得してフォーマット
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
 
-                    // PDF保存ボタンと×ボタンを再表示する
-                    pdfButtonContainer.style.display = 'block';
-                    closeButton.style.display = 'block';
+            // ファイル名に日時を含める
+            pdf.save(`構成提案_${formattedDate}.pdf`);
 
-                    // 枠線を再表示する
-                    modalContent.style.border = '1px solid #888';
-                }).catch(error => {
-                    console.error('Error generating PDF:', error);
-                    // PDF保存ボタンと×ボタンを再表示する
-                    pdfButtonContainer.style.display = 'block';
-                    closeButton.style.display = 'block';
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
 
-                    // 枠線を再表示する
-                    modalContent.style.border = '1px solid #888';
-                });
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        }).catch(error => {
+            console.error('Error generating PDF:', error);
+            // PDF保存ボタンと×ボタンを再表示する
+            pdfButtonContainer.style.display = 'block';
+            closeButton.style.display = 'block';
+
+            // 枠線を再表示する
+            modalContent.style.border = '1px solid #888';
+        });
+    }
+}
+
+// エクスポート機能（csv, text, xls）
+function exportResult() {
+    // 事前に最新の計算結果を出しておく
+    calculateResult();
+
+    const exportFormat = document.getElementById('exportSelect').value; // csv | txt | xls
+    const resultText = document.getElementById('result').innerText.trim();
+
+    switch (exportFormat) {
+        case 'csv':
+            exportAsCSV(resultText);
+            break;
+        case 'txt':
+            exportAsText(resultText);
+            break;
+        case 'xls':
+            exportAsExcel(resultText);
+            break;
+        default:
+            alert('エクスポート形式を選択してください');
+            break;
+    }
+}
+
+// CSVエクスポート
+function exportAsCSV(text) {
+    // 行を分割
+    const lines = text.split('\n');
+    let csvLines = [];
+
+    // 各行が "キー: 値" という形式を想定し、カンマ区切りに変換
+    for (let line of lines) {
+        let trimmed = line.trim();
+        if (trimmed) {
+            // コロンで分割
+            const parts = trimmed.split(':');
+            if (parts.length === 2) {
+                const key = parts[0].trim().replace(/\s/g, ' ');
+                const val = parts[1].trim().replace(/\s/g, ' ');
+                csvLines.push(`"${key}","${val}"`);
+            } else {
+                // コロンが見つからない場合はそのまま
+                csvLines.push(`"${trimmed}"`);
             }
         }
+    }
 
-        // スプラッシュスクリーンの表示と切り替え
-        window.onload = function() {
-            const splashScreen = document.getElementById('splashScreen');
-            const mainContent = document.getElementById('mainContent');
+    const csvContent = csvLines.join('\n');
 
-            // 画像を5秒間表示
-            setTimeout(() => {
-                splashScreen.style.opacity = '0'; // フェードアウト開始
-                setTimeout(() => {
-                    splashScreen.style.display = 'none';
-                    mainContent.style.display = 'flex';
-                }, 1000); // フェードアウトの時間と一致させる
-            }, 3000);
+    // Blobを作成
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    // ダウンロード用リンクを作成してクリック
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Textエクスポート
+function exportAsText(text) {
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Excelエクスポート（簡易：HTMLテーブルをXLSファイルとして保存）
+function exportAsExcel(text) {
+    const lines = text.split('\n');
+    let tableHTML = '<table border="1"><tbody>';
+
+    for (let line of lines) {
+        let trimmed = line.trim();
+        if (trimmed) {
+            const parts = trimmed.split(':');
+            if (parts.length === 2) {
+                const key = parts[0].trim();
+                const val = parts[1].trim();
+                tableHTML += `<tr><td>${key}</td><td>${val}</td></tr>`;
+            } else {
+                // コロンが見つからない場合は一つのセルに
+                tableHTML += `<tr><td colspan="2">${trimmed}</td></tr>`;
+            }
         }
+    }
+
+    tableHTML += '</tbody></table>';
+
+    // Excel用にBlobを生成
+    const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'export_result.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// スプラッシュスクリーンの表示と切り替え
+window.onload = function() {
+    const splashScreen = document.getElementById('splashScreen');
+    const mainContent = document.getElementById('mainContent');
+
+    // 画像を5秒間表示
+    setTimeout(() => {
+        splashScreen.style.opacity = '0'; // フェードアウト開始
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+            mainContent.style.display = 'flex';
+        }, 500); // フェードアウトの時間と一致させる
+    }, 2000);
+}
     </script>
 </body>
 </html>
