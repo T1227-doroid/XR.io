@@ -4,84 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XR-9000構成アプリケーション Osaka Branch ver</title>
+    <!-- Icon library (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest/dist/lu.min.js"></script>
     <style>
+        /* 基本デザインをスタイリッシュに */
         body {
-            font-family: 'Roboto', sans-serif;
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            background-color: #f4f4f9;
             margin: 0;
             padding: 0;
+            font-family: 'Roboto', sans-serif;
+            font-size: 14px;
+            background-color: #f9fafb;
+            color: #1f2937;
+            display: flex;
         }
+        /* コンテナとスプラッシュ */
         .container {
-            display: none; /* 初期状態で非表示 */
+            display: none;
             width: 100%;
-            height: 100vh;
+            min-height: 100vh;
         }
         .splash-screen {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            height: 100vh;
-            background-color: #fff;
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: #fff;
             z-index: 1000;
-            transition: opacity 1s ease-out; /* フェードアウトのアニメーション */
+            transition: opacity 1s ease-out;
         }
         .splash-screen img {
             max-width: 100%;
             max-height: 100%;
         }
+        /* 左パネル(質問) */
         .questions {
             width: 35%;
             padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            background-color: #fff;
+            border-right: 1px solid #e5e7eb;
             overflow-y: auto;
+            position: relative;
         }
-        .question input[type="number"] {
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 80px;
+            height: auto;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .app-title {
+            text-align: center;
+            margin: 0;
+            margin-bottom: 16px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4b5563;
+        }
+        .question input[type="number"],
+        .question select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
             font-size: 14px;
-            box-sizing: border-box; /* パディングとボーダーを含めた幅調整 */
-            appearance: textfield; /* スピナーを削除する（ブラウザ依存） */
+            box-sizing: border-box;
+            background-color: #fff;
+            color: #1f2937;
         }
-
-        .question input[type="number"]::-webkit-outer-spin-button,
-        .question input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0; /* Webkitブラウザのスピナーを非表示 */
+        .question input[type="checkbox"] {
+            margin-right: 8px;
         }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        /* 右パネル(結果) */
         .results {
             width: 65%;
             padding: 20px;
+            background-color: #fff;
+            border-left: 1px solid #e5e7eb;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            background-color: #ffffff;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
             overflow-y: auto;
         }
         .result-section {
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
             margin-bottom: 20px;
         }
         .result {
-            margin-top: 15px;
-            font-weight: bold;
+            margin-top: 12px;
             background-color: #e9ecef;
-            padding: 0px;
-            border-radius: 5px;
-            width: 100%;
+            border-radius: 4px;
+            padding: 10px;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
         .image-section {
             width: 100%;
@@ -90,105 +133,36 @@
             align-items: center;
             margin-top: 15px;
         }
-        .section-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 20px;
-            color: rgb(0, 91, 172);
+        .image-section img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
         }
-        .question {
-            margin-bottom: 20px;
-        }
-        .question label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        .question select, .question input[type="checkbox"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-        }
-        .checkbox-container label {
-            margin-bottom: 0;
-            margin-right: 10px;
-        }
+        /* ボタン類 */
         .button-container {
-            width: 100%;
             display: flex;
-            justify-content: space-between;
+            gap: 12px;
             margin-bottom: 20px;
         }
-        .button-container button {
-            padding: 10px 20px;
-            background-color: rgb(0, 153, 68);
+        .icon-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 16px;
+            background-color: #3b82f6;
             color: #fff;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
+            font-weight: 500;
             transition: background-color 0.3s;
         }
-        .button-container button:hover {
-            background-color: rgb(182, 213, 95);
+        .icon-button:hover {
+            background-color: #2563eb;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 20px;
-            border: 1px solid rgb(0, 153, 68);
-            width: 80%;
-            max-width: 1200px;
-            border-radius: 10px;
-        }
-        .close {
-            color: rgb(0, 153, 68);
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: rgb(182, 213, 95);
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .signature {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5em;
-            text-align: right;
-        }
-        .gradient-text {
-            background: linear-gradient(to right, rgb(0, 91, 172), rgb(182, 213, 95));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-        }
-        .logo {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            width: 100px; /* ロゴの幅を調整 */
-            height: auto; /* アスペクト比を維持 */
-        }
-        /* Vimeo埋め込みのスタイル */
+        /* 動画エリア */
         .video-section {
             width: 100%;
             margin-top: 20px;
@@ -197,37 +171,88 @@
             width: 100%;
             height: 360px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
         }
-        /* エクスポート用のスタイル */
+        /* エクスポート */
         .export-container {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
         .export-select {
             padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
             font-size: 14px;
             background-color: #fff;
+            color: #1f2937;
+        }
+        /* モーダル関連 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #ffffff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 1200px;
+            border: 1px solid #e5e7eb;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4b5563;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #1f2937;
+        }
+        /* YouTubeセクション：XR-9000紹介 */
+        .youtube-section {
+            width: 100%;
+            margin-top: 30px;
+        }
+        .youtube-section h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+        .youtube-section iframe {
+            width: 100%;
+            height: 360px;
+            border: none;
+            border-radius: 6px;
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
 </head>
 <body>
+    <!-- スプラッシュスクリーン -->
     <div class="splash-screen" id="splashScreen">
         <img id="splashImage" src="images/background.png" alt="Background Image">
     </div>
+
+    <!-- メインコンテナ -->
     <div class="container" id="mainContent">
+        <!-- 左パネル：質問 -->
         <div class="questions">
-            <div style="text-align: center;">
-                <img src="images/logo.png" alt="Logo" class="logo">
-                <h1 class="gradient-text">XR-9000構成アプリケーション Osaka Branch ver</h1>
-            </div>
+            <img src="images/logo.png" alt="Logo" class="logo">
+            <h1 class="app-title gradient-text">XR-9000構成アプリケーション<br>Osaka Branch ver</h1>
+
             <div class="section-title">1-1 XRモジュール台数</div>
             <div class="question">
                 <label for="q1">1. 1日の検体数は？</label>
@@ -246,13 +271,6 @@
                     <option value="なし">なし</option>
                 </select>
             </div>
-<!--             <div class="question">
-                <label for="q4">4. 必要なXRモジュール数は？</label>
-                <select id="q4">
-                    <option value="偶数">偶数台数</option>
-                    <option value="奇数">奇数台数</option>
-                </select>
-            </div> -->
 
             <div class="section-title">1-3 濃縮試薬(RU)の選択</div>
             <div class="checkbox-container">
@@ -361,52 +379,79 @@
             </div>
         </div>
 
+        <!-- 右パネル：結果 -->
         <div class="results">
+            <!-- ボタンコンテナ -->
             <div class="button-container">
-                <button onclick="calculateResult()">結果を表示</button>
-                <button onclick="openModal()">拡大表示</button>
+                <button class="icon-button" onclick="calculateResult()">
+                    <i data-lucide="play-circle"></i>
+                    結果を表示
+                </button>
+                <button class="icon-button" onclick="openModal()">
+                    <i data-lucide="maximize"></i>
+                    拡大表示
+                </button>
             </div>
+
             <div class="result-section">
-                <h3>ご提案構成イメージ</h3>
-                <h4>※ST-40、ST-41の配置は参考です。</h4>
+                <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">ご提案構成イメージ</h3>
+                <h4 style="margin-top: 4px; color: #6b7280; font-weight: 400;">※ST-40、ST-41の配置は参考です。</h4>
                 <div class="result" id="result"></div>
             </div>
             <div class="image-section">
-                <img id="patternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
+                <img id="patternImage" src="" alt="構成パターン図">
             </div>
-            <!-- Vimeo動画を表示する領域 -->
+            <!-- Vimeo動画 -->
             <div class="video-section" id="videoContainer"></div>
-            <!-- エクスポートの種類選択 -->
+
+            <!-- XR-9000紹介：YouTube -->
+            <div class="youtube-section">
+                <iframe src="https://www.youtube.com/embed/_S8trQsU-J0" allowfullscreen></iframe>
+            </div>
+
+            <!-- エクスポート選択 -->
             <div class="export-container">
-                <label for="exportSelect">エクスポート形式:</label>
+                <label for="exportSelect" style="font-weight: 500; color: #4b5563;">エクスポート形式:</label>
                 <select class="export-select" id="exportSelect">
                     <option value="csv">CSV</option>
                     <option value="txt">Text</option>
                     <option value="xls">Excel</option>
+                    <option value="json">JSON</option>
                 </select>
-                <button onclick="exportResult()">エクスポート</button>
+                <button class="icon-button" onclick="exportResult()">
+                    <i data-lucide="download"></i>
+                    エクスポート
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- モーダルウィンドウ -->
     <div id="resultModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <div class="result-section">
-                <h2>ご提案構成イメージ</h2>
-                <h4>※ST-40、ST-41の配置は参考です。</h4>
+            <div class="result-section" style="margin-top: 20px;">
+                <h2 style="margin: 0; font-size: 1rem; font-weight: 600;">ご提案構成イメージ</h2>
+                <h4 style="margin-top: 4px; color: #6b7280; font-weight: 400;">※ST-40、ST-41の配置は参考です。</h4>
                 <div class="result" id="modalResult"></div>
             </div>
             <div class="image-section">
-                <img id="modalPatternImage" src="" alt="構成パターン図" style="max-width: 100%; max-height: 300px;">
+                <img id="modalPatternImage" src="" alt="構成パターン図">
             </div>
-            <div class="button-container" id="pdfButtonContainer">
-               <button onclick="saveAsPDF()">PDFで保存</button>
+            <div class="button-container" id="pdfButtonContainer" style="margin-top: 20px;">
+                <!-- PDFボタンは削除済み -->
             </div>
         </div>
     </div>
 
     <script>
+        /*
+          lucideアイコンの描画初期化
+        */
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
         function calculateResult() {
             const q1 = parseInt(document.getElementById('q1').value) || 0;
             const q2 = parseInt(document.getElementById('q2').value) || 0;
@@ -739,257 +784,174 @@ if (xrCount === 2) {
     }
 }
 
-document.getElementById('result').innerText = `\n    XRモジュール台数: ${xrCount}台\n    モジュールタイプ: ${moduleType}\n    濃縮試薬(RU): ${ru}\n    WPCチャンネル: ${wpc}\n    PLT-Fチャンネル: ${pltF}\n    BFモード: ${bf}\n    SP-50数: ${sp50}\n    DI-60: ${di60}\n    TS-10の位置: ${ts10}\n    BloodScience Workcell: ${bloodScience}\n    最終構成パターン図番号: ${patternNumber}\n`;
 
-// パターン番号に応じた画像の表示
-const patternImage = document.getElementById('patternImage');
-patternImage.src = `images/pattern${patternNumber}.png`; // 画像のパスを適宜変更してください
-patternImage.alt = `構成パターン図 ${patternNumber}`;
+            // 出力
+            document.getElementById('result').innerText = `\n    XRモジュール台数: ${xrCount}台\n    モジュールタイプ: ${moduleType}\n    濃縮試薬(RU): ${ru}\n    WPCチャンネル: ${wpc}\n    PLT-Fチャンネル: ${pltF}\n    BFモード: ${bf}\n    SP-50数: ${sp50}\n    DI-60: ${di60}\n    TS-10の位置: ${ts10}\n    BloodScience Workcell: ${bloodScience}\n    最終構成パターン図番号: ${patternNumber}\n`;
 
-// 動画の埋め込み処理
-const videoContainer = document.getElementById('videoContainer');
-if (q22 || q23 || q24) {
-    // BloodScience Workcellに関する動画を表示
-    videoContainer.innerHTML = `\n      <iframe src="https://player.vimeo.com/video/843146377"\n              frameborder="0" allow="autoplay; fullscreen; picture-in-picture"\n              allowfullscreen></iframe>`;
-} else {
-    videoContainer.innerHTML = "";
-}
+            // パターン番号に応じた画像
+            const patternImage = document.getElementById('patternImage');
+            patternImage.src = `images/pattern${patternNumber}.png`;
+            patternImage.alt = `構成パターン図 ${patternNumber}`;
 
-// モーダル用の結果も更新
-document.getElementById('modalResult').innerText = document.getElementById('result').innerText;
-const modalPatternImage = document.getElementById('modalPatternImage');
-modalPatternImage.src = patternImage.src;
-modalPatternImage.alt = patternImage.alt;
-}
+            // 動画の埋め込み
+            const videoContainer = document.getElementById('videoContainer');
+            if (q22 || q23 || q24) {
+                // BloodScience Workcellに関する動画
+                videoContainer.innerHTML = `\n<iframe src="https://player.vimeo.com/video/843146377" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+            } else {
+                videoContainer.innerHTML = "";
+            }
 
-function openModal() {
-    calculateResult();
-    document.getElementById('resultModal').style.display = "block";
-}
+            // モーダルにも反映
+            document.getElementById('modalResult').innerText = document.getElementById('result').innerText;
+            const modalPatternImage = document.getElementById('modalPatternImage');
+            modalPatternImage.src = patternImage.src;
+            modalPatternImage.alt = patternImage.alt;
+        }
 
-function closeModal() {
-    document.getElementById('resultModal').style.display = "none";
-}
+        function openModal() {
+            calculateResult();
+            document.getElementById('resultModal').style.display = 'block';
+        }
 
-// モーダル外をクリックしたときにモーダルを閉じる
-window.onclick = function(event) {
-    const modal = document.getElementById('resultModal');
-    if (event.target === modal) {
-        modal.style.display = "none";
-    }
-}
+        function closeModal() {
+            document.getElementById('resultModal').style.display = 'none';
+        }
 
-// PDF保存機能
-function saveAsPDF() {
-    const pdfButtonContainer = document.getElementById('pdfButtonContainer');
-    const closeButton = document.querySelector('.close');
-    const modalContent = document.querySelector('.modal-content');
+        window.onclick = function(event) {
+            const modal = document.getElementById('resultModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
 
-    // PDF保存ボタンと×ボタンを非表示にする
-    pdfButtonContainer.style.display = 'none';
-    closeButton.style.display = 'none';
+        // エクスポート
+        function exportResult() {
+            calculateResult();
+            const exportFormat = document.getElementById('exportSelect').value;
+            const resultText = document.getElementById('result').innerText.trim();
 
-    // 枠線を非表示にする
-    modalContent.style.border = 'none';
+            if (exportFormat === 'csv') {
+                exportAsCSV(resultText);
+            } else if (exportFormat === 'txt') {
+                exportAsText(resultText);
+            } else if (exportFormat === 'xls') {
+                exportAsExcel(resultText);
+            } else if (exportFormat === 'json') {
+                exportAsJSON(resultText);
+            } else {
+                alert('エクスポート形式を選択してください');
+            }
+        }
 
-    // 高解像度のキャンバスを生成するためのオプション
-    const options = {
-    scale: 1, // 適度な解像度
-    // useCORS: true, // ← 一旦OFFに
-    allowTaint: true // 同一ドメイン以外の画像があってもキャプチャできるように
-};
+        function exportAsCSV(text) {
+            const lines = text.split('\n');
+            let csvLines = [];
+            for (let line of lines) {
+                let trimmed = line.trim();
+                if (trimmed) {
+                    const parts = trimmed.split(':');
+                    if (parts.length === 2) {
+                        const key = parts[0].trim().replace(/\s/g, ' ');
+                        const val = parts[1].trim().replace(/\s/g, ' ');
+                        csvLines.push(`"${key}","${val}"`);
+                    } else {
+                        csvLines.push(`"${trimmed}"`);
+                    }
+                }
+            }
+            const csvContent = csvLines.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'export_result.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-    // モーダル画像の読み込み完了を待つ
-    const modalPatternImage = document.getElementById('modalPatternImage');
+        function exportAsText(text) {
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'export_result.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
-    if (modalPatternImage.complete) {
-        generatePDF();
-    } else {
-        modalPatternImage.onload = generatePDF;
-        modalPatternImage.onerror = function() {
-            console.error('Error loading image');
-            // PDF保存ボタンと×ボタンを再表示する
-            pdfButtonContainer.style.display = 'block';
-            closeButton.style.display = 'block';
-            // 枠線を再表示する
-            modalContent.style.border = '1px solid #888';
+        function exportAsExcel(text) {
+            const lines = text.split('\n');
+            let tableHTML = '<table border="1" style="border-collapse:collapse;">';
+            tableHTML += '<tbody>';
+            for (let line of lines) {
+                let trimmed = line.trim();
+                if (trimmed) {
+                    const parts = trimmed.split(':');
+                    if (parts.length === 2) {
+                        const key = parts[0].trim();
+                        const val = parts[1].trim();
+                        tableHTML += `<tr><td>${key}</td><td>${val}</td></tr>`;
+                    } else {
+                        tableHTML += `<tr><td colspan="2">${trimmed}</td></tr>`;
+                    }
+                }
+            }
+            tableHTML += '</tbody></table>';
+
+            const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'export_result.xls';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportAsJSON(text) {
+            const lines = text.split('\n');
+            let jsonObject = {};
+            for (let line of lines) {
+                let trimmed = line.trim();
+                if (!trimmed) continue;
+                const parts = trimmed.split(':');
+                if (parts.length === 2) {
+                    let key = parts[0].trim();
+                    let val = parts[1].trim();
+                    jsonObject[key] = val;
+                } else {
+                    jsonObject['その他'] = trimmed;
+                }
+            }
+            const jsonString = JSON.stringify(jsonObject, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'export_result.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // スプラッシュスクリーン
+        window.onload = function() {
+            const splashScreen = document.getElementById('splashScreen');
+            const mainContent = document.getElementById('mainContent');
+            // 2秒後にフェードアウト
+            setTimeout(() => {
+                splashScreen.style.opacity = '0';
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    mainContent.style.display = 'flex';
+                    // アイコン描画
+                    lucide.createIcons();
+                }, 500);
+            }, 2000);
         };
-    }
-
-    function generatePDF() {
-        html2canvas(modalContent, options).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('l', 'mm', 'a4'); // 'l'を指定してランドスケープにする
-            const imgWidth = 297; // A4の横幅
-            const pageHeight = 210; // A4の縦高さ
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            // 現在の日時を取得してフォーマット
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-
-            // ファイル名に日時を含める
-            pdf.save(`構成提案_${formattedDate}.pdf`);
-
-            // PDF保存ボタンと×ボタンを再表示する
-            pdfButtonContainer.style.display = 'block';
-            closeButton.style.display = 'block';
-
-            // 枠線を再表示する
-            modalContent.style.border = '1px solid #888';
-        }).catch(error => {
-            console.error('Error generating PDF:', error);
-            // PDF保存ボタンと×ボタンを再表示する
-            pdfButtonContainer.style.display = 'block';
-            closeButton.style.display = 'block';
-
-            // 枠線を再表示する
-            modalContent.style.border = '1px solid #888';
-        });
-    }
-}
-
-// エクスポート機能（csv, text, xls）
-function exportResult() {
-    // 事前に最新の計算結果を出しておく
-    calculateResult();
-
-    const exportFormat = document.getElementById('exportSelect').value; // csv | txt | xls
-    const resultText = document.getElementById('result').innerText.trim();
-
-    switch (exportFormat) {
-        case 'csv':
-            exportAsCSV(resultText);
-            break;
-        case 'txt':
-            exportAsText(resultText);
-            break;
-        case 'xls':
-            exportAsExcel(resultText);
-            break;
-        default:
-            alert('エクスポート形式を選択してください');
-            break;
-    }
-}
-
-// CSVエクスポート
-function exportAsCSV(text) {
-    // 行を分割
-    const lines = text.split('\n');
-    let csvLines = [];
-
-    // 各行が "キー: 値" という形式を想定し、カンマ区切りに変換
-    for (let line of lines) {
-        let trimmed = line.trim();
-        if (trimmed) {
-            // コロンで分割
-            const parts = trimmed.split(':');
-            if (parts.length === 2) {
-                const key = parts[0].trim().replace(/\s/g, ' ');
-                const val = parts[1].trim().replace(/\s/g, ' ');
-                csvLines.push(`"${key}","${val}"`);
-            } else {
-                // コロンが見つからない場合はそのまま
-                csvLines.push(`"${trimmed}"`);
-            }
-        }
-    }
-
-    const csvContent = csvLines.join('\n');
-
-    // Blobを作成
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    // ダウンロード用リンクを作成してクリック
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'export_result.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// Textエクスポート
-function exportAsText(text) {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'export_result.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// Excelエクスポート（簡易：HTMLテーブルをXLSファイルとして保存）
-function exportAsExcel(text) {
-    const lines = text.split('\n');
-    let tableHTML = '<table border="1"><tbody>';
-
-    for (let line of lines) {
-        let trimmed = line.trim();
-        if (trimmed) {
-            const parts = trimmed.split(':');
-            if (parts.length === 2) {
-                const key = parts[0].trim();
-                const val = parts[1].trim();
-                tableHTML += `<tr><td>${key}</td><td>${val}</td></tr>`;
-            } else {
-                // コロンが見つからない場合は一つのセルに
-                tableHTML += `<tr><td colspan="2">${trimmed}</td></tr>`;
-            }
-        }
-    }
-
-    tableHTML += '</tbody></table>';
-
-    // Excel用にBlobを生成
-    const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'export_result.xls';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-// スプラッシュスクリーンの表示と切り替え
-window.onload = function() {
-    const splashScreen = document.getElementById('splashScreen');
-    const mainContent = document.getElementById('mainContent');
-
-    // 画像を5秒間表示
-    setTimeout(() => {
-        splashScreen.style.opacity = '0'; // フェードアウト開始
-        setTimeout(() => {
-            splashScreen.style.display = 'none';
-            mainContent.style.display = 'flex';
-        }, 500); // フェードアウトの時間と一致させる
-    }, 2000);
-}
     </script>
 </body>
 </html>
