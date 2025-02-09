@@ -323,7 +323,7 @@
                 width: 100%;
                 height: auto;
                 padding: 16px;
-                padding-bottom: 160px; /* タブレット表示時の余白をさらに増やす */
+                padding-bottom: 200px; /* 余白を増やす */
             }
             .app-title {
                 font-size: 1.2rem;
@@ -331,6 +331,25 @@
             }
             .logo {
                 width: 60px;
+            }
+
+            /* iPadの横向き表示対応 */
+            @media (orientation: landscape) {
+                .questions {
+                    max-height: 100vh;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch; /* iOSのスムーズスクロール */
+                }
+                
+                .question {
+                    margin-bottom: 12px; /* 質問間の余白を少し縮める */
+                    padding: 16px; /* パディングを少し縮める */
+                }
+                
+                .section-title {
+                    margin-top: 20px; /* セクションタイトルの余白を調整 */
+                    margin-bottom: 12px;
+                }
             }
         }
 
@@ -659,6 +678,20 @@
         
         #importFile {
             display: none;
+        }
+
+        /* iPadのスクロールバーのスタイリング */
+        .questions::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .questions::-webkit-scrollbar-track {
+            background: var(--surface);
+        }
+        
+        .questions::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
         }
     </style>
 </head>
