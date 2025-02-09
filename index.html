@@ -324,36 +324,38 @@
                 width: 100%;
                 height: auto;
                 padding: 16px;
-                padding-bottom: 300px;
+                padding-bottom: 300px; /* さらに余白を増やす */
+            }
+            .app-title {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            .logo {
+                width: 60px;
             }
 
             /* iPadの横向き表示対応 */
             @media (orientation: landscape) {
-                .questions, .results {
-                    max-height: none;
+                .questions {
+                    max-height: none; /* 高さ制限を解除 */
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
-                    padding-bottom: 400px;
+                    padding-bottom: 400px; /* 横向き時の余白をさらに増やす */
                 }
-
-                /* 右側の結果表示エリアの調整 */
-                .results {
-                    padding-bottom: 500px; /* 結果表示エリアの余白をさらに増やす */
-                }
-
-                /* 結果表示エリアの最後の要素に余白を追加 */
-                .results > *:last-child {
-                    margin-bottom: 200px;
-                }
-
-                /* 画像セクションの余白調整 */
-                .image-section {
-                    margin-bottom: 100px;
-                }
-
+                
                 .question {
                     margin-bottom: 16px;
                     padding: 16px;
+                }
+                
+                .section-title {
+                    margin-top: 20px;
+                    margin-bottom: 12px;
+                }
+                
+                /* 最後の質問の下部余白を確保 */
+                .question:last-child {
+                    margin-bottom: 200px;
                 }
             }
 
@@ -1013,228 +1015,258 @@
             let bloodScience = (q21 || q22 || q23) ? 'BloodScience Workcellの提案' : 'BloodScience Workcellなし';
 
             // 最終構成パターン図番号の計算
-            let patternNumber = 0;
-            if (xrCount === 2) {
-                if (moduleType === 'ツインモジュール') {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 1 : 2;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 3 : 4;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 5 : 6;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 7 : 8;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 9 : 10;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 11 : 12;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 13 : 14;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 15 : 16;
-                            }
-                        }
-                    }
+let patternNumber = 0;
+if (xrCount === 2) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 1 : 2;
                 } else {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 17 : 18;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 19 : 20;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 21 : 22;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 23 : 24;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 25 : 26;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 27 : 28;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 29 : 30;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 31 : 32;
-                            }
-                        }
-                    }
+                    patternNumber = ts10 === 'TS-10中央配置' ? 3 : 4;
                 }
-            } else if (xrCount === 4) {
-                if (moduleType === 'ツインモジュール') {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 33 : 34;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 35 : 36;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 37 : 38;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 39 : 40;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 41 : 42;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 43 : 44;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 45 : 46;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 47 : 48;
-                            }
-                        }
-                    }
-                }
-            } else if (xrCount === 6) {
-                if (moduleType === 'ツインモジュール') {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 65 : 66;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 67 : 68;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 69 : 70;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 71 : 72;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 73 : 74;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 75 : 76;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 77 : 78;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 79 : 80;
-                            }
-                        }
-                    }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 5 : 6;
                 } else {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 81 : 82;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 83 : 84;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 85 : 86;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 87 : 88;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 89 : 90;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 91 : 92;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 93 : 94;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 95 : 96;
-                            }
-                        }
-                    }
-                }
-            } else if (xrCount === 3) {
-                if (moduleType === 'シングルモジュール') {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 97 : 98;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 99 : 100;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 101 : 102;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 103 : 104;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 105 : 106;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 107 : 108;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 109 : 110;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 111 : 112;
-                            }
-                        }
-                    }
-                }
-            } else if (xrCount === 5) {
-                if (moduleType === 'シングルモジュール') {
-                    if (ru === 'RUあり') {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 113 : 114;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 115 : 116;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 117 : 118;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 119 : 120;
-                            }
-                        }
-                    } else {
-                        if (sp50 === 'SP-50 1台') {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 121 : 122;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 123 : 124;
-                            }
-                        } else {
-                            if (di60 === 'DI-60なし') {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 125 : 126;
-                            } else {
-                                patternNumber = ts10 === 'TS-10中央配置' ? 127 : 128;
-                            }
-                        }
-                    }
+                    patternNumber = ts10 === 'TS-10中央配置' ? 7 : 8;
                 }
             }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 9 : 10;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 11 : 12;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 13 : 14;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 15 : 16;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 17 : 18;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 19 : 20;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 21 : 22;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 23 : 24;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 25 : 26;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 27 : 28;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 29 : 30;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 31 : 32;
+                }
+            }
+        }
+    }
+} else if (xrCount === 4) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 33 : 34;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 35 : 36;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 37 : 38;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 39 : 40;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 41 : 42;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 43 : 44;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 45 : 46;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 47 : 48;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 49 : 50;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 51 : 52;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 53 : 54;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 55 : 56;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 57 : 58;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 59 : 60;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 61 : 62;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 63 : 64;
+                }
+            }
+        }
+    }
+} else if (xrCount === 6) {
+    if (moduleType === 'ツインモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 65 : 66;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 67 : 68;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 69 : 70;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 71 : 72;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 73 : 74;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 75 : 76;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 77 : 78;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 79 : 80;
+                }
+            }
+        }
+    } else {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 81 : 82;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 83 : 84;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 85 : 86;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 87 : 88;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 89 : 90;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 91 : 92;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 93 : 94;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 95 : 96;
+                }
+            }
+        }
+    }
+} else if (xrCount === 3) {
+    if (moduleType === 'シングルモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 97 : 98;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 99 : 100;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 101 : 102;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 103 : 104;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 105 : 106;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 107 : 108;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 109 : 110;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 111 : 112;
+                }
+            }
+        }
+    }
+} else if (xrCount === 5) {
+    if (moduleType === 'シングルモジュール') {
+        if (ru === 'RUあり') {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 113 : 114;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 115 : 116;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 117 : 118;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 119 : 120;
+                }
+            }
+        } else {
+            if (sp50 === 'SP-50 1台') {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 121 : 122;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 123 : 124;
+                }
+            } else {
+                if (di60 === 'DI-60なし') {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 125 : 126;
+                } else {
+                    patternNumber = ts10 === 'TS-10中央配置' ? 127 : 128;
+                }
+            }
+        }
+    }
+}
 
             // 出力
             document.getElementById('result').innerText = `XRモジュール台数: ${xrCount}台\nモジュールタイプ: ${moduleType}\n濃縮試薬(RU): ${ru}\nWPCチャンネル: ${wpc}\nPLT-Fチャンネル: ${pltF}\nBFモード: ${bf}\nSP-50数: ${sp50}\nDI-60: ${di60}\nTS-10の位置: ${ts10}\nBloodScience Workcell: ${bloodScience}\n最終構成パターン図番号: ${patternNumber}`;
