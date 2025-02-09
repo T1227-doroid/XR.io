@@ -18,6 +18,7 @@
             display: flex;
             height: 100vh;
             overflow: hidden;
+            -webkit-overflow-scrolling: touch;
         }
         /* コンテナとスプラッシュ */
         .container {
@@ -323,33 +324,43 @@
                 width: 100%;
                 height: auto;
                 padding: 16px;
-                padding-bottom: 200px; /* 余白を増やす */
-            }
-            .app-title {
-                font-size: 1.2rem;
-                margin-bottom: 20px;
-            }
-            .logo {
-                width: 60px;
+                padding-bottom: 300px;
             }
 
             /* iPadの横向き表示対応 */
             @media (orientation: landscape) {
-                .questions {
-                    max-height: 100vh;
+                .questions, .results {
+                    max-height: none;
                     overflow-y: auto;
-                    -webkit-overflow-scrolling: touch; /* iOSのスムーズスクロール */
+                    -webkit-overflow-scrolling: touch;
+                    padding-bottom: 400px;
                 }
-                
+
+                /* 右側の結果表示エリアの調整 */
+                .results {
+                    padding-bottom: 500px; /* 結果表示エリアの余白をさらに増やす */
+                }
+
+                /* 結果表示エリアの最後の要素に余白を追加 */
+                .results > *:last-child {
+                    margin-bottom: 200px;
+                }
+
+                /* 画像セクションの余白調整 */
+                .image-section {
+                    margin-bottom: 100px;
+                }
+
                 .question {
-                    margin-bottom: 12px; /* 質問間の余白を少し縮める */
-                    padding: 16px; /* パディングを少し縮める */
+                    margin-bottom: 16px;
+                    padding: 16px;
                 }
-                
-                .section-title {
-                    margin-top: 20px; /* セクションタイトルの余白を調整 */
-                    margin-bottom: 12px;
-                }
+            }
+
+            /* スクロール時の慣性スクロールを有効化 */
+            body {
+                -webkit-overflow-scrolling: touch;
+                overflow-y: auto;
             }
         }
 
