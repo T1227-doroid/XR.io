@@ -51,7 +51,8 @@
             border-right: 1px solid #e5e7eb;
             overflow-y: auto;
             position: relative;
-            height: calc(100vh - 40px); /* 上下のパディングを考慮 */
+            height: calc(100vh - 40px);
+            padding-bottom: 120px; /* 下部の余白を増やす */
         }
         .logo {
             position: absolute;
@@ -59,6 +60,9 @@
             left: 10px;
             width: 80px;
             height: auto;
+            display: block;
+            margin: 0 auto;
+            margin-bottom: 10px;
         }
         .gradient-text {
             background: linear-gradient(to right, #4f46e5, #10b981);
@@ -68,8 +72,7 @@
         }
         .app-title {
             text-align: center;
-            margin: 0;
-            margin-bottom: 16px;
+            margin: 20px 0;
             font-size: 1.4rem;
             font-weight: 700;
             color: #1f2937;
@@ -320,6 +323,7 @@
                 width: 100%;
                 height: auto;
                 padding: 16px;
+                padding-bottom: 160px; /* タブレット表示時の余白をさらに増やす */
             }
             .app-title {
                 font-size: 1.2rem;
@@ -630,6 +634,32 @@
         .help-tooltip:hover .help-content {
             display: block;
         }
+
+        /* データモーダルのスタイル */
+        .data-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 20px 0;
+        }
+        
+        .export-section,
+        .import-section {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .export-section h3,
+        .import-section h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--gray-800);
+        }
+        
+        #importFile {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -779,9 +809,9 @@
                     <i data-lucide="play-circle"></i>
                     結果表示
                 </button>
-                <button class="icon-button" onclick="openModal()">
-                    <i data-lucide="maximize"></i>
-                    拡大表示
+                <button class="icon-button" onclick="openDataModal()">
+                    <i data-lucide="file-input"></i>
+                    データ入出力
                 </button>
             </div>
 
@@ -800,38 +830,47 @@
             <div class="youtube-section">
                 <iframe src="https://www.youtube.com/embed/_S8trQsU-J0" allowfullscreen></iframe>
             </div>
+        </div>
+    </div>
 
-            <!-- エクスポート選択 -->
-            <div class="export-container">
-                <label for="exportSelect" style="font-weight: 500; color: #4b5563;">エクスポート形式:</label>
-                <select class="export-select" id="exportSelect">
-                    <option value="csv">CSV</option>
-                    <option value="txt">Text</option>
-                    <option value="xls">Excel</option>
-                    <option value="json">JSON</option>
-                </select>
-                <button class="icon-button" onclick="exportResult()">
-                    <i data-lucide="download"></i>
-                    エクスポート
-                </button>
+    <!-- 結果モーダル -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalResult"></div>
+            <div class="image-section">
+                <img id="modalPatternImage" src="" alt="">
             </div>
         </div>
     </div>
 
-    <!-- モーダルウィンドウ -->
-    <div id="resultModal" class="modal">
+    <!-- インポート・エクスポートモーダル -->
+    <div id="dataModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div class="result-section" style="margin-top: 20px;">
-                <h2 style="margin: 0; font-size: 1rem; font-weight: 600;">ご提案構成イメージ</h2>
-                <h4 style="margin-top: 4px; color: #6b7280; font-weight: 400;">※ST-40、ST-41の配置は参考です。</h4>
-                <div class="result" id="modalResult"></div>
-            </div>
-            <div class="image-section">
-                <img id="modalPatternImage" src="" alt="">
-            </div>
-            <div class="button-container" id="pdfButtonContainer" style="margin-top: 20px;">
-                <!-- PDFボタンは削除済み -->
+            <span class="close" onclick="closeDataModal()">&times;</span>
+            <h2>データのインポート・エクスポート</h2>
+            <div class="data-actions">
+                <div class="export-section">
+                    <h3>エクスポート</h3>
+                    <select id="exportSelect" class="export-select">
+                        <option value="">エクスポート形式を選択</option>
+                        <option value="csv">CSV形式</option>
+                        <option value="txt">テキスト形式</option>
+                        <option value="json">JSON形式</option>
+                    </select>
+                    <button class="icon-button" onclick="exportResult()">
+                        <i data-lucide="download"></i>
+                        エクスポート
+                    </button>
+                </div>
+                <div class="import-section">
+                    <h3>インポート</h3>
+                    <input type="file" id="importFile" accept=".json,.csv,.txt,.xls">
+                    <button class="icon-button" onclick="document.getElementById('importFile').click()">
+                        <i data-lucide="upload"></i>
+                        ファイルを選択
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1177,19 +1216,21 @@
             modalPatternImage.alt = patternImage.alt;
         }
 
-        function openModal() {
-            calculateResult();
-            document.getElementById('resultModal').style.display = 'block';
+        function openDataModal() {
+            document.getElementById('dataModal').style.display = 'block';
         }
 
-        function closeModal() {
-            document.getElementById('resultModal').style.display = 'none';
+        function closeDataModal() {
+            document.getElementById('dataModal').style.display = 'none';
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('resultModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
+            const resultModal = document.getElementById('resultModal');
+            const dataModal = document.getElementById('dataModal');
+            if (event.target === resultModal) {
+                resultModal.style.display = 'none';
+            } else if (event.target === dataModal) {
+                dataModal.style.display = 'none';
             }
         }
 
@@ -1200,9 +1241,9 @@
             
             // 質問と回答を収集
             const qa = {
-                "Q1. 1日の検体数": document.getElementById('q1').value || "未回答",
-                "Q2. 1時間当たりの最大検体数": document.getElementById('q2').value || "未回答",
-                "Q3. 別号機再検の希望": document.getElementById('q3').value || "未回答",
+                "Q1. 1日の検体数": document.getElementById('q1').value,
+                "Q2. 1時間当たりの最大検体数": document.getElementById('q2').value,
+                "Q3. 別号機再検の希望": document.getElementById('q3').value,
                 "Q4. セルパックの交換頻度を減らしたい": document.getElementById('q4-1').checked ? "はい" : "いいえ",
                 "Q5. セルパックの在庫スペースを削減したい": document.getElementById('q5-1').checked ? "はい" : "いいえ",
                 "Q6. 造血幹細胞移植をしている": document.getElementById('q6-1').checked ? "はい" : "いいえ",
@@ -1213,29 +1254,27 @@
                 "Q11. 体液の機械値報告をしたい": document.getElementById('q11-1').checked ? "はい" : "いいえ",
                 "Q12. 当直帯に体液検体の報告が必要": document.getElementById('q12-1').checked ? "はい" : "いいえ",
                 "Q13. 体液の鏡検者の不足またはスキル継続に課題がある": document.getElementById('q13-1').checked ? "はい" : "いいえ",
-                "Q14. 標本枚数/日": document.getElementById('q14').value || "未回答",
-                "Q15. 現在、血液像自動分析装置の有無": document.getElementById('q15').value || "未回答",
+                "Q14. 標本枚数/日": document.getElementById('q14').value,
+                "Q15. 現在、血液像自動分析装置の有無": document.getElementById('q15').value,
                 "Q16. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい": document.getElementById('q16-1').checked ? "はい" : "いいえ",
                 "Q17. 検査室内での鏡検スキルの平準化を進めたい": document.getElementById('q17-1').checked ? "はい" : "いいえ",
-                "Q18. SPないしDIが複数台数あるか": document.getElementById('q18').value || "未回答",
-                "Q19. 設置面積をできる限り狭くしたいか": document.getElementById('q19').value || "未回答",
-                "Q20. TS-10の検体回収作業を端で行いたいか": document.getElementById('q20').value || "未回答",
+                "Q18. SPないしDIが複数台数あるか": document.getElementById('q18').value,
+                "Q19. 設置面積をできる限り狭くしたいか": document.getElementById('q19').value,
+                "Q20. TS-10の検体回収作業を端で行いたいか": document.getElementById('q20').value,
                 "Q21. 血液・凝固検査を含めた自動化を進めたい": document.getElementById('q21-1').checked ? "はい" : "いいえ",
                 "Q22. 血液・凝固検査の担当人員を減らしたい": document.getElementById('q22-1').checked ? "はい" : "いいえ",
                 "Q23. 夜間当直帯の装置オペレーションを少なくしたい": document.getElementById('q23-1').checked ? "はい" : "いいえ"
             };
-
-            // 結果を取得
-            const resultText = document.getElementById('result').innerText.trim();
-            const fullText = "【質問と回答】\n" + Object.entries(qa).map(([q, a]) => `${q}: ${a}`).join('\n') + 
-                           "\n\n【分析結果】\n" + resultText;
+            
+            const resultText = document.getElementById('result').innerText;
+            const fullText = "【質問と回答】\n" + 
+                Object.entries(qa).map(([q, a]) => `${q}: ${a}`).join('\n') + 
+                "\n\n【分析結果】\n" + resultText;
 
             if (exportFormat === 'csv') {
                 exportAsCSV(qa, resultText);
             } else if (exportFormat === 'txt') {
                 exportAsText(fullText);
-            } else if (exportFormat === 'xls') {
-                exportAsExcel(qa, resultText);
             } else if (exportFormat === 'json') {
                 exportAsJSON(qa, resultText);
             } else {
@@ -1276,33 +1315,6 @@
             const link = document.createElement('a');
             link.href = url;
             link.download = 'export_result.txt';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function exportAsExcel(qa, resultText) {
-            let tableHTML = '<table border="1" style="border-collapse:collapse;">';
-            // 質問と回答
-            tableHTML += '<tr><th colspan="2">質問と回答</th></tr>';
-            for (let [q, a] of Object.entries(qa)) {
-                tableHTML += `<tr><td>${q}</td><td>${a}</td></tr>`;
-            }
-            // 分析結果
-            tableHTML += '<tr><th colspan="2">分析結果</th></tr>';
-            resultText.split('\n').forEach(line => {
-                const parts = line.trim().split(':');
-                if (parts.length === 2) {
-                    tableHTML += `<tr><td>${parts[0].trim()}</td><td>${parts[1].trim()}</td></tr>`;
-                }
-            });
-            tableHTML += '</table>';
-
-            const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'export_result.xls';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1382,6 +1394,142 @@
                 }, 500);
             }, 2000);
         };
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    switch(extension) {
+                        case 'json':
+                            importJSON(e.target.result);
+                            break;
+                        case 'csv':
+                            importCSV(e.target.result);
+                            break;
+                        case 'txt':
+                            importTXT(e.target.result);
+                            break;
+                        case 'xls':
+                            importXLS(e.target.result);
+                            break;
+                    }
+                } catch (error) {
+                    alert('インポートに失敗しました: ' + error.message);
+                }
+            };
+            
+            if (file.name.endsWith('.json')) {
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.csv')) {
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.txt')) {
+                reader.readAsText(file);
+            } else if (file.name.endsWith('.xls')) {
+                reader.readAsBinaryString(file);
+            }
+        });
+
+        function importJSON(content) {
+            const data = JSON.parse(content);
+            // JSONデータを各フィールドに設定
+            if (data["質問と回答"]) {
+                const qa = data["質問と回答"];
+                document.getElementById('q1').value = qa["Q1. 1日の検体数"] || '';
+                document.getElementById('q2').value = qa["Q2. 1時間当たりの最大検体数"] || '';
+                document.getElementById('q3').value = qa["Q3. 別号機再検の希望"] || '';
+                document.getElementById('q4-1').checked = qa["Q4. セルパックの交換頻度を減らしたい"] === "はい";
+                document.getElementById('q5-1').checked = qa["Q5. セルパックの在庫スペースを削減したい"] === "はい";
+                document.getElementById('q6-1').checked = qa["Q6. 造血幹細胞移植をしている"] === "はい";
+                document.getElementById('q7-1').checked = qa["Q7. IPメッセージ「Blasts/Abn Lympho?」の精査をしたい"] === "はい";
+                document.getElementById('q8-1').checked = qa["Q8. IPFの臨床要望がある"] === "はい";
+                document.getElementById('q9-1').checked = qa["Q9. PLT 5万以下の検体数が多い"] === "はい";
+                document.getElementById('q10-1').checked = qa["Q10. 破砕赤血球の出現検体が時々ある"] === "はい";
+                document.getElementById('q11-1').checked = qa["Q11. 体液の機械値報告をしたい"] === "はい";
+                document.getElementById('q12-1').checked = qa["Q12. 当直帯に体液検体の報告が必要"] === "はい";
+                document.getElementById('q13-1').checked = qa["Q13. 体液の鏡検者の不足またはスキル継続に課題がある"] === "はい";
+                document.getElementById('q14').value = qa["Q14. 標本枚数/日"] || '';
+                document.getElementById('q15').value = qa["Q15. 現在、血液像自動分析装置の有無"] || '';
+                document.getElementById('q16-1').checked = qa["Q16. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい"] === "はい";
+                document.getElementById('q17-1').checked = qa["Q17. 検査室内での鏡検スキルの平準化を進めたい"] === "はい";
+                document.getElementById('q18').value = qa["Q18. SPないしDIが複数台数あるか"] || '';
+                document.getElementById('q19').value = qa["Q19. 設置面積をできる限り狭くしたいか"] || '';
+                document.getElementById('q20').value = qa["Q20. TS-10の検体回収作業を端で行いたいか"] || '';
+                document.getElementById('q21-1').checked = qa["Q21. 血液・凝固検査を含めた自動化を進めたい"] === "はい";
+                document.getElementById('q22-1').checked = qa["Q22. 血液・凝固検査の担当人員を減らしたい"] === "はい";
+                document.getElementById('q23-1').checked = qa["Q23. 夜間当直帯の装置オペレーションを少なくしたい"] === "はい";
+            }
+            calculateResult();
+        }
+
+        function importCSV(content) {
+            const lines = content.split('\n');
+            const data = {};
+            lines.forEach(line => {
+                const [section, key, value] = line.split(',').map(item => item.replace(/"/g, ''));
+                if (key && value) {
+                    data[key] = value;
+                }
+            });
+            // CSVデータを各フィールドに設定
+            document.getElementById('q1').value = data["Q1. 1日の検体数"] || '';
+            document.getElementById('q2').value = data["Q2. 1時間当たりの最大検体数"] || '';
+            document.getElementById('q3').value = data["Q3. 別号機再検の希望"] || '';
+            document.getElementById('q4-1').checked = data["Q4. セルパックの交換頻度を減らしたい"] === "はい";
+            document.getElementById('q5-1').checked = data["Q5. セルパックの在庫スペースを削減したい"] === "はい";
+            document.getElementById('q6-1').checked = data["Q6. 造血幹細胞移植をしている"] === "はい";
+            document.getElementById('q7-1').checked = data["Q7. IPメッセージ「Blasts/Abn Lympho?」の精査をしたい"] === "はい";
+            document.getElementById('q8-1').checked = data["Q8. IPFの臨床要望がある"] === "はい";
+            document.getElementById('q9-1').checked = data["Q9. PLT 5万以下の検体数が多い"] === "はい";
+            document.getElementById('q10-1').checked = data["Q10. 破砕赤血球の出現検体が時々ある"] === "はい";
+            document.getElementById('q11-1').checked = data["Q11. 体液の機械値報告をしたい"] === "はい";
+            document.getElementById('q12-1').checked = data["Q12. 当直帯に体液検体の報告が必要"] === "はい";
+            document.getElementById('q13-1').checked = data["Q13. 体液の鏡検者の不足またはスキル継続に課題がある"] === "はい";
+            document.getElementById('q14').value = data["Q14. 標本枚数/日"] || '';
+            document.getElementById('q15').value = data["Q15. 現在、血液像自動分析装置の有無"] || '';
+            document.getElementById('q16-1').checked = data["Q16. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい"] === "はい";
+            document.getElementById('q17-1').checked = data["Q17. 検査室内での鏡検スキルの平準化を進めたい"] === "はい";
+            document.getElementById('q18').value = data["Q18. SPないしDIが複数台数あるか"] || '';
+            document.getElementById('q19').value = data["Q19. 設置面積をできる限り狭くしたいか"] || '';
+            document.getElementById('q20').value = data["Q20. TS-10の検体回収作業を端で行いたいか"] || '';
+            document.getElementById('q21-1').checked = data["Q21. 血液・凝固検査を含めた自動化を進めたい"] === "はい";
+            document.getElementById('q22-1').checked = data["Q22. 血液・凝固検査の担当人員を減らしたい"] === "はい";
+            document.getElementById('q23-1').checked = data["Q23. 夜間当直帯の装置オペレーションを少なくしたい"] === "はい";
+            calculateResult();
+        }
+
+        function importTXT(content) {
+            const lines = content.split('\n');
+            const data = {};
+            let isQA = false;
+            lines.forEach(line => {
+                if (line.includes('【質問と回答】')) {
+                    isQA = true;
+                } else if (line.includes('【分析結果】')) {
+                    isQA = false;
+                } else if (isQA) {
+                    const [key, value] = line.split(':').map(item => item.trim());
+                    if (key && value) {
+                        data[key] = value;
+                    }
+                }
+            });
+            // テキストデータを各フィールドに設定
+            document.getElementById('q1').value = data["Q1. 1日の検体数"] || '';
+            document.getElementById('q2').value = data["Q2. 1時間当たりの最大検体数"] || '';
+            document.getElementById('q3').value = data["Q3. 別号機再検の希望"] || '';
+            document.getElementById('q14').value = data["Q14. 標本枚数/日"] || '';
+            // 以下同様に他のフィールドも設定
+            calculateResult(); // 結果を再計算
+        }
+
+        function importXLS(content) {
+            // この関数はExcel形式のインポートを想定していますが、実装が必要です。
+            alert('Excel形式のインポートは現在サポートされていません。');
+        }
     </script>
 </body>
 </html>
