@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XR-9000構成アプリケーション Osaka Branch ver2</title>
     <!-- Icon library (Lucide) -->
-    <script src="https://unpkg.com/lucide@latest/dist/lu.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="config.js"></script>
     <style>
         /* 基本デザインをスタイリッシュに */
         body {
@@ -706,6 +707,297 @@
             background: var(--border);
             border-radius: 4px;
         }
+
+        .voice-hearing-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .voice-hearing-section.hidden {
+            margin: 0;
+            padding: 0;
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            border: none;
+        }
+
+        .recording-status {
+            margin: 10px 0;
+            color: var(--text-light);
+        }
+
+        .summary-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+            max-height: 1000px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        
+        .summary-container.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .toggle-button i {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-button.collapsed i {
+            transform: rotate(180deg);
+        }
+
+        /* 会話要約セクションのスライド表示 */
+        .voice-hearing-section {
+            position: fixed;
+            top: 0;
+            right: -600px; /* 初期状態では画面外に配置 */
+            width: 600px;
+            height: 100vh;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .voice-hearing-section.visible {
+            right: 0;
+        }
+        
+        /* 会話要約トグルボタン */
+        #voiceToggleButton {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 会話要約コンテンツのスタイル調整 */
+        .summary-container {
+            margin: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        /* スクロールバーのスタイリング */
+        .summary-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .summary-container::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+        
+        .summary-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .summary-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+        
+        /* 会話要約ヘッダー */
+        .section-header {
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+        }
+
+        .summary-item {
+            border-left: 3px solid var(--primary);
+            margin-bottom: 15px;
+            padding: 10px;
+            background: var(--surface);
+            border-radius: 4px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .summary-time {
+            font-size: 0.8em;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .summary-text {
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* スクロール可能な要約コンテンツエリア */
+        #conversationSummary {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* スクロールバーのスタイリング */
+        #conversationSummary::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #conversationSummary::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+        
+        #conversationSummary::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        
+        #conversationSummary::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+
+        .conversation-text {
+            font-size: 0.9em;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .conversation-text pre {
+            margin: 0;
+            white-space: pre-wrap;
+            font-family: inherit;
+        }
+
+        .summary-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 10px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .voice-hearing-section {
+                width: 100%;
+                right: -100%;
+            }
+        }
+
+        /* 最新の要約をハイライト */
+        .summary-item.latest {
+            border-left: 4px solid var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        /* スクロールバーのスタイリング改善 */
+        .conversation-text::-webkit-scrollbar,
+        .summary-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .conversation-text::-webkit-scrollbar-track,
+        .summary-container::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 4px;
+        }
+        
+        .conversation-text::-webkit-scrollbar-thumb,
+        .summary-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .summary-item {
+            scroll-margin-top: 20px; /* スクロール時の余白 */
+        }
+
+        .latest {
+            animation: highlight 1s ease;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: rgba(59, 130, 246, 0.05); }
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .export-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1100;
+        }
+
+        .export-menu-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .export-menu button {
+            padding: 10px 20px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .export-menu button:hover {
+            background: var(--primary-hover);
+        }
     </style>
 </head>
 <body>
@@ -926,6 +1218,33 @@
         <div class="help-content">
             <h4>入力のヒント</h4>
             <p>このセクションでは...</p>
+        </div>
+    </div>
+
+    <!-- 会話要約表示切替ボタン -->
+    <button class="icon-only-button" onclick="toggleVoiceSection()" id="voiceToggleButton" title="会話要約の表示/非表示">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <!-- 音声ヒアリング機能の追加 -->
+    <div class="voice-hearing-section" id="voiceSection">
+        <div class="section-header">
+            <h3>会話要約</h3>
+            <div class="header-buttons">
+                <button class="icon-only-button" onclick="exportConversation()" title="会話内容をエクスポート">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="icon-only-button" onclick="toggleVoiceSection()" title="閉じる">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="summary-container" id="summaryContainer">
+            <button class="icon-only-button" onclick="startVoiceRecording()" id="recordButton" title="音声録音開始">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <div class="recording-status" id="recordingStatus"></div>
+            <div id="conversationSummary" class="summary-content"></div>
         </div>
     </div>
 
@@ -1617,12 +1936,295 @@ if (xrCount === 2) {
             document.getElementById('q21-1').checked = data["Q21. 血液・凝固検査を含めた自動化を進めたい"] === "はい";
             document.getElementById('q22-1').checked = data["Q22. 血液・凝固検査の担当人員を減らしたい"] === "はい";
             document.getElementById('q23-1').checked = data["Q23. 夜間当直帯の装置オペレーションを少なくしたい"] === "はい";
-            calculateResult();
+            calculateResult(); // 結果を再計算
         }
 
         function importXLS(content) {
             // この関数はExcel形式のインポートを想定していますが、実装が必要です。
             alert('Excel形式のインポートは現在サポートされていません。');
+        }
+
+        // 音声認識の初期化
+        let recognition;
+        let isRecording = false;
+        let transcriptBuffer = '';
+        let fullTranscript = '';  // 全体の会話を保持
+        let summaryHistory = [];  // 要約履歴を保持する配列
+        let conversationHistory = [];  // 会話履歴を保持する配列
+        let currentSummary = {};  // 現在の要約内容を保持
+        
+        // 音声認識のオプション
+        const recognitionConfig = {
+            continuous: true,
+            interimResults: true,
+            lang: 'ja-JP',
+            maxAlternatives: 1
+        };
+
+        function initSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            Object.assign(recognition, recognitionConfig);
+
+            // エラーハンドリング
+            recognition.onerror = function(event) {
+                console.error('音声認識エラー:', event.error);
+                document.getElementById('recordingStatus').textContent = 
+                    'エラーが発生しました: ' + event.error;
+            };
+
+            // 音声認識が終了した時の処理
+            recognition.onend = function() {
+                if (isRecording) {
+                    recognition.start();  // 継続的な認識のために再開
+                }
+            };
+
+            recognition.onresult = async function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + '\n';
+                        // 会話履歴に追加
+                        conversationHistory.push({
+                            time: new Date().toLocaleTimeString(),
+                            text: event.results[i][0].transcript
+                        });
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    fullTranscript += finalTranscript;
+                    transcriptBuffer += finalTranscript;
+                    
+                    if (transcriptBuffer.split('。').length > 3) {
+                        await summarizeConversation(transcriptBuffer);
+                        transcriptBuffer = '';
+                    }
+                }
+
+                document.getElementById('recordingStatus').textContent = 
+                    '録音中: ' + (interimTranscript || finalTranscript || '音声を認識中...');
+            };
+        }
+
+        async function summarizeConversation(text) {
+            try {
+                const previousSummary = currentSummary;
+                
+                const response = await fetch(config.API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + config.API_KEY
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-4-turbo-preview",
+                        messages: [{
+                            role: "system",
+                            content: `あなたは医療機器メーカーの営業担当者のアシスタントです。
+                            顧客とのヒアリング内容から以下の点をまとめてください。要約結果は更新しても下記のQ1～の順番通り保持してください。Q1～最後まで開始位置を合わせて表示してください。：
+                            Q1. 1日の検体数: 
+                            Q2. 1時間当たりの最大検体数: 
+                            Q3. 別号機再検の希望: 
+                            Q4. セルパックの交換頻度を減らしたい: 
+                            Q5. セルパックの在庫スペースを削減したい: 
+                            Q6. 造血幹細胞移植をしている: 
+                            Q7. IPメッセージ「Blasts/Abn Lympho?」の精査をしたい: 
+                            Q8. IPFの臨床要望がある: 
+                            Q9. PLT 5万以下の検体数が多い: 
+                            Q10. 破砕赤血球の出現検体が時々ある: 
+                            Q11. 体液の機械値報告をしたい: 
+                            Q12. 当直帯に体液検体の報告が必要: 
+                            Q13. 体液の鏡検者の不足またはスキル継続に課題がある: 
+                            Q14. 標本枚数/日: 
+                            Q15. 現在、血液像自動分析装置の有無: 
+                            Q16. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい: 
+                            Q17. 検査室内での鏡検スキルの平準化を進めたい: 
+                            Q18. SPないしDIが複数台数あるか: 
+                            Q19. 設置面積をできる限り狭くしたいか: 
+                            Q20. TS-10の検体回収作業を端で行いたいか: 
+                            Q21. 血液・凝固検査を含めた自動化を進めたい: 
+                            Q22. 血液・凝固検査の担当人員を減らしたい: 
+                            Q23. 夜間当直帯の装置オペレーションを少なくしたい: 
+                            Q24. 日々の困りごとなど: 
+                            また、前回の要約内容がある場合は、その情報を保持したまま更新してください。`
+                        }, {
+                            role: "assistant",
+                            content: (previousSummary.text || "").trim()
+                        }, {
+                            role: "user",
+                            content: text
+                        }],
+                        temperature: 0.7,
+                        max_tokens: 1000
+                    })
+                });
+
+                const data = await response.json();
+                const summary = data.choices[0].message.content.trim();
+                
+                // 現在の要約を更新
+                currentSummary = {
+                    time: new Date().toLocaleTimeString(),
+                    text: summary,
+                    conversation: [...conversationHistory]
+                };
+                
+                // 要約を履歴に追加
+                summaryHistory.push({
+                    time: new Date().toLocaleTimeString(),
+                    text: summary,
+                    originalText: text,
+                    conversation: [...conversationHistory]
+                });
+                
+                const summaryElement = document.getElementById('conversationSummary');
+                // 全ての要約履歴を表示（最新の要約を上に表示）
+                summaryElement.innerHTML = summaryHistory.map((item, index) => `<div class="summary-item ${index === summaryHistory.length - 1 ? 'latest' : ''}" id="${index === summaryHistory.length - 1 ? 'latestSummary' : ''}"><div class="summary-time">${item.time}</div><div class="conversation-text"><strong>会話内容:</strong><pre>${item.conversation.map(conv => `[${conv.time}] ${conv.text.trim()}`).join('\n')}</pre></div><div class="summary-text"><strong>AIメモ:</strong><br>${item.text.trim()}</div></div>`).join('');
+
+                // 最新の要約にスクロール
+                const latestSummary = document.getElementById('latestSummary');
+                if (latestSummary) {
+                    latestSummary.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start'
+                    });
+                }
+
+                // 会話内容の自動スクロール
+                const conversationElements = document.querySelectorAll('.conversation-text');
+                if (conversationElements.length > 0) {
+                    const latestConversation = conversationElements[conversationElements.length - 1];
+                    scrollToLatestConversation(latestConversation);
+                }
+
+            } catch (error) {
+                console.error('要約エラー:', error);
+                document.getElementById('recordingStatus').textContent = 
+                    '要約処理でエラーが発生しました';
+            }
+        }
+
+        // 録音開始時に履歴をクリアするかどうかを確認
+        function startVoiceRecording() {
+            if (!isRecording) {
+                if (summaryHistory.length > 0) {
+                    if (confirm('新しい会話を開始しますか？以前の要約は消去されます。')) {
+                        summaryHistory = [];
+                        conversationHistory = [];
+                        currentSummary = {};
+                        document.getElementById('conversationSummary').innerHTML = '';
+                    }
+                }
+                if (!recognition) {
+                    initSpeechRecognition();
+                }
+                recognition.start();
+                isRecording = true;
+                document.getElementById('recordButton').classList.add('recording');
+                document.getElementById('recordingStatus').textContent = '録音中...';
+            } else {
+                recognition.stop();
+                isRecording = false;
+                document.getElementById('recordButton').classList.remove('recording');
+                document.getElementById('recordingStatus').textContent = '録音停止';
+                if (transcriptBuffer.length > 0) {
+                    summarizeConversation(transcriptBuffer);
+                    transcriptBuffer = '';
+                }
+            }
+        }
+
+        function toggleVoiceSection() {
+            const section = document.getElementById('voiceSection');
+            if (section.classList.contains('visible')) {
+                section.classList.remove('visible');
+            } else {
+                section.classList.add('visible');
+            }
+        }
+
+        // 会話内容の自動スクロール
+        function scrollToLatestConversation(conversationElement) {
+            if (conversationElement) {
+                conversationElement.scrollTop = conversationElement.scrollHeight;
+            }
+        }
+
+        // 会話内容のエクスポート
+        function exportConversation() {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `conversation_${timestamp}`;
+            
+            // エクスポートするデータの準備
+            const exportData = summaryHistory.map(item => ({
+                time: item.time,
+                conversation: item.conversation.map(conv => `[${conv.time}] ${conv.text}`).join('\n'),
+                summary: item.text
+            }));
+            
+            // エクスポートメニューの表示
+            const menu = document.createElement('div');
+            menu.className = 'export-menu';
+            menu.innerHTML = `
+                <div class="export-menu-content">
+                    <button onclick="exportAs('txt', '${filename}')">テキストファイル (.txt)</button>
+                    <button onclick="exportAs('json', '${filename}')">JSON形式 (.json)</button>
+                    <button onclick="exportAs('csv', '${filename}')">CSV形式 (.csv)</button>
+                </div>
+            `;
+            document.body.appendChild(menu);
+            
+            // メニューを一定時間後に自動的に閉じる
+            setTimeout(() => {
+                document.body.removeChild(menu);
+            }, 5000);
+        }
+
+        // 各形式でのエクスポート
+        function exportAs(format, filename) {
+            const data = summaryHistory.map(item => ({
+                time: item.time,
+                conversation: item.conversation.map(conv => `[${conv.time}] ${conv.text}`).join('\n'),
+                summary: item.text
+            }));
+
+            let content = '';
+            let type = '';
+            
+            switch(format) {
+                case 'txt':
+                    content = data.map(item => 
+                        `時刻: ${item.time}\n\n会話内容:\n${item.conversation}\n\nAIメモ:\n${item.summary}\n\n${'-'.repeat(50)}\n`
+                    ).join('\n');
+                    type = 'text/plain';
+                    break;
+                case 'json':
+                    content = JSON.stringify(data, null, 2);
+                    type = 'application/json';
+                    break;
+                case 'csv':
+                    content = 'Time,Conversation,Summary\n' + 
+                        data.map(item => 
+                            `"${item.time}","${item.conversation.replace(/"/g, '""')}","${item.summary.replace(/"/g, '""')}"`
+                        ).join('\n');
+                    type = 'text/csv';
+                    break;
+            }
+
+            const blob = new Blob([content], { type: `${type};charset=utf-8` });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${filename}.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>
