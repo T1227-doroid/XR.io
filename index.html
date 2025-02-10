@@ -1597,9 +1597,27 @@ if (xrCount === 2) {
             document.getElementById('q1').value = data["Q1. 1日の検体数"] || '';
             document.getElementById('q2').value = data["Q2. 1時間当たりの最大検体数"] || '';
             document.getElementById('q3').value = data["Q3. 別号機再検の希望"] || '';
+            document.getElementById('q4-1').checked = data["Q4. セルパックの交換頻度を減らしたい"] === "はい";
+            document.getElementById('q5-1').checked = data["Q5. セルパックの在庫スペースを削減したい"] === "はい";
+            document.getElementById('q6-1').checked = data["Q6. 造血幹細胞移植をしている"] === "はい";
+            document.getElementById('q7-1').checked = data["Q7. IPメッセージ「Blasts/Abn Lympho?」の精査をしたい"] === "はい";
+            document.getElementById('q8-1').checked = data["Q8. IPFの臨床要望がある"] === "はい";
+            document.getElementById('q9-1').checked = data["Q9. PLT 5万以下の検体数が多い"] === "はい";
+            document.getElementById('q10-1').checked = data["Q10. 破砕赤血球の出現検体が時々ある"] === "はい";
+            document.getElementById('q11-1').checked = data["Q11. 体液の機械値報告をしたい"] === "はい";
+            document.getElementById('q12-1').checked = data["Q12. 当直帯に体液検体の報告が必要"] === "はい";
+            document.getElementById('q13-1').checked = data["Q13. 体液の鏡検者の不足またはスキル継続に課題がある"] === "はい";
             document.getElementById('q14').value = data["Q14. 標本枚数/日"] || '';
-            // 以下同様に他のフィールドも設定
-            calculateResult(); // 結果を再計算
+            document.getElementById('q15').value = data["Q15. 現在、血液像自動分析装置の有無"] || '';
+            document.getElementById('q16-1').checked = data["Q16. 鏡検枚数が200枚以上/日であり、鏡検数の低減をしたい"] === "はい";
+            document.getElementById('q17-1').checked = data["Q17. 検査室内での鏡検スキルの平準化を進めたい"] === "はい";
+            document.getElementById('q18').value = data["Q18. SPないしDIが複数台数あるか"] || '';
+            document.getElementById('q19').value = data["Q19. 設置面積をできる限り狭くしたいか"] || '';
+            document.getElementById('q20').value = data["Q20. TS-10の検体回収作業を端で行いたいか"] || '';
+            document.getElementById('q21-1').checked = data["Q21. 血液・凝固検査を含めた自動化を進めたい"] === "はい";
+            document.getElementById('q22-1').checked = data["Q22. 血液・凝固検査の担当人員を減らしたい"] === "はい";
+            document.getElementById('q23-1').checked = data["Q23. 夜間当直帯の装置オペレーションを少なくしたい"] === "はい";
+            calculateResult();
         }
 
         function importXLS(content) {
