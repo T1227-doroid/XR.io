@@ -763,12 +763,12 @@
         .voice-hearing-section {
             position: fixed;
             top: 0;
-            right: -600px; /* 初期状態では画面外に配置 */
+            right: -100vw; /* 画面幅分だけ右に移動 */
             width: 600px;
             height: 100vh;
             background: var(--surface);
             border-left: 1px solid var(--border);
-            transition: right 0.3s ease;
+            transition: right 0.4s ease-in-out;
             z-index: 1000;
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
         }
@@ -783,10 +783,17 @@
             right: 20px;
             bottom: 20px;
             z-index: 1001;
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.5em; /* アイコンサイズを大きく */
+            transition: all 0.3s ease;
+        }
+        
+        #voiceToggleButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         }
         
         /* 会話要約コンテンツのスタイル調整 */
@@ -921,7 +928,7 @@
         @media (max-width: 768px) {
             .voice-hearing-section {
                 width: 100%;
-                right: -100%;
+                right: -100vw;
             }
         }
 
@@ -2022,11 +2029,11 @@ if (xrCount === 2) {
                         'Authorization': 'Bearer ' + config.API_KEY
                     },
                     body: JSON.stringify({
-                        model: "gpt-4-turbo-preview",
+                        model: "gpt-4-turbo",
                         messages: [{
                             role: "system",
                             content: `あなたは医療機器メーカーの営業担当者のアシスタントです。
-                            顧客とのヒアリング内容から以下の点をまとめてください。要約結果は更新しても下記のQ1～の順番通り保持してください。Q1～最後まで開始位置を合わせて表示してください。：
+                            顧客とのヒアリング内容から以下の点をまとめてください。要約結果は更新しても下記のQ1～の順番通り保持してください。：
                             Q1. 1日の検体数: 
                             Q2. 1時間当たりの最大検体数: 
                             Q3. 別号機再検の希望: 
