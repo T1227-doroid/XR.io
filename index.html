@@ -7,6 +7,8 @@
     <!-- Icon library (Lucide) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="config.js"></script>
+    <!-- Mermaid.js の追加 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <style>
         /* 基本デザインをスタイリッシュに */
         body {
@@ -254,13 +256,17 @@
             background-color: rgba(0,0,0,0.4);
         }
         .modal-content {
-            background-color: #ffffff;
-            margin: 5% auto;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 1200px;
-            border: 1px solid #e5e7eb;
             position: relative;
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            width: 95%;
+            max-width: 1800px;
+            max-height: 95vh;
+            border-radius: 8px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
         }
         .close {
             position: absolute;
@@ -308,6 +314,8 @@
             --dark-bg: #1a1a1a;
             --dark-text: #e5e7eb;
             --dark-surface: #2d2d2d;
+            --mermaid-node-spacing: 100px;
+            --mermaid-rank-spacing: 80px;
         }
 
         .icon-button {
@@ -1005,6 +1013,123 @@
         .export-menu button:hover {
             background: var(--primary-hover);
         }
+
+        /* ロジックチャートボタンのスタイル */
+        #logicChartButton {
+            position: fixed;
+            right: 20px;
+            bottom: 100px;
+            z-index: 1001;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+
+        #logicChartButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* モーダルのスタイル */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            width: 95%;
+            max-width: 1800px;
+            max-height: 95vh;
+            border-radius: 8px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .modal-header button {
+            background: transparent;
+            border: none;
+            color: white;
+        }
+
+        .modal-body {
+            flex-grow: 1;
+            overflow: auto;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mermaid {
+            width: 100%;
+            height: 100%;
+            min-height: 800px;
+            background: white;
+            transform-origin: top left;
+            transform: scale(1.4);
+            margin: 20px;
+            padding: 20px;
+        }
+
+        /* スクロールバーのスタイル */
+        .modal-body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-hover);
+        }
+
+        /* フローチャートの配置調整 */
+        #logicChartContent {
+            width: 100%;
+            overflow-x: auto;
+            padding: 20px;
+        }
+
+        /* フローチャートのノード間隔調整 */
+        :root {
+            --mermaid-node-spacing: 100px;
+            --mermaid-rank-spacing: 80px;
+        }
     </style>
 </head>
 <body>
@@ -1252,6 +1377,26 @@
             </button>
             <div class="recording-status" id="recordingStatus"></div>
             <div id="conversationSummary" class="summary-content"></div>
+        </div>
+    </div>
+
+    <!-- ロジックチャート表示ボタン -->
+    <button class="icon-only-button" onclick="toggleLogicChart()" id="logicChartButton" title="ロジックチャート表示">
+        <i class="fas fa-sitemap"></i>
+    </button>
+
+    <!-- ロジックチャートモーダル -->
+    <div id="logicChartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>構成パターン判定ロジック</h2>
+                <button class="icon-only-button" onclick="toggleLogicChart()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="logicChartContent" class="logic-chart"></div>
+            </div>
         </div>
     </div>
 
@@ -2232,6 +2377,136 @@ if (xrCount === 2) {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+        }
+
+        // Mermaid の初期化
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        function displayLogicChart() {
+            const content = document.getElementById('logicChartContent');
+            content.innerHTML = `
+                <div class="mermaid">
+                    graph TB
+                    %% XRモジュール台数判定
+                    subgraph XR台数判定1
+                    A[1日の検体数] --> A1{判定1}
+                    A1 -->|≧1200| X1[6台]
+                    A1 -->|≧1000| X2[5台]
+                    A1 -->|≧800| X3[4台]
+                    A1 -->|≧600| X4[3台]
+                    A1 -->|その他| X5[2台]
+                    end
+
+                    subgraph XR台数判定2
+                    B[1時間当たりの最大検体数] --> B1{判定2}
+                    B1 -->|≧400| Y1[5台]
+                    B1 -->|≧300| Y2[4台]
+                    B1 -->|≧200| Y3[3台]
+                    B1 -->|≧100| Y4[2台]
+                    B1 -->|その他| Y5[1台]
+                    end
+
+                    X1 & X2 & X3 & X4 & X5 --> XR{最大値選択}
+                    Y1 & Y2 & Y3 & Y4 & Y5 --> XR
+
+                    %% モジュール構成判定
+                    XR --> MT{モジュール判定}
+                    C[別号機再検] --> MT
+                    MT -->|偶数台数かつ再検あり| TW[ツインモジュール]
+                    MT -->|その他| SG[シングルモジュール]
+                      
+                    %% RU判定
+                    TW & SG --> RU{RU判定}
+                    Q4[試薬使用量削減] --> RU
+                    Q5[在庫スペース削減] --> RU
+                    RU -->|いずれかYes| RU1[RUあり]
+                    RU -->|両方No| RU2[RUなし]
+                      
+                    %% WPCチャンネル判定
+                    RU1 & RU2 --> WPC{WPC判定}
+                    Q6[造血幹細胞移植有無] --> WPC
+                    Q7[「Blasts/Abn Lympho?」精査] --> WPC
+                    WPC -->|いずれかYes| WPC1[WPCあり]
+                    WPC -->|両方No| WPC2[WPCなし]
++
+                    %% PLT-F判定
+                    WPC1 & WPC2 --> PLT{PLT-F判定}
+                    Q8[IPF臨床要望] --> PLT
+                    Q9[PLT5万以下検体] --> PLT
+                    Q10[破砕赤血球出現] --> PLT
+                    PLT -->|いずれかYes| PLT1[PLT-Fあり]
+                    PLT -->|全てNo| PLT2[PLT-Fなし]
++
+                    %% BFモード判定
+                    PLT1 & PLT2 --> BF{BF判定}
+                    Q11[体液機械値報告] --> BF
+                    Q12[当直帯の体液測定] --> BF
+                    Q13[体液鏡検者不足] --> BF
+                    BF -->|いずれかYes| BF1[BFあり]
+                    BF -->|全てNo| BF2[BFなし]
++
+                    %% SP-50判定
+                    BF1 & BF2 --> SP{SP-50判定}
+                    Q14[1日塗抹枚数] --> SP
+                    SP -->|<150枚| SP1[SP-50 1台]
+                    SP -->|≧150枚| SP2[SP-50 2台]
++
+                    %% DI-60判定
+                    SP1 & SP2 --> DI{DI-60判定}
+                    Q15[現在のDI-60の有無] --> DI
+                    Q16[鏡検数が200枚以上/日] --> DI
+                    Q17[鏡検スキルの平準化] --> DI
+                    DI -->|いずれかYes| DI1[DI-60あり]
+                    DI -->|全てNo| DI2[DI-60なし]
++
+                    %% TS-10判定
+                    DI1 & DI2 --> TS{TS-10判定}
+                    Q20[搬送システム] --> TS
+                    TS -->|あり| TS1[TS-10最後尾]
+                    TS -->|なし| TS2[TS-10中央]
+                      
+                    %% 最終構成
+                    RU1 & RU2 & WPC1 & WPC2 & PLT1 & PLT2 & BF1 & BF2 & SP1 & SP2 & DI1 & DI2 & TS1 & TS2 --> P((構成パターン))
+                      
+                    style P fill:#f96,stroke:#333,stroke-width:4px
+                    style XR fill:#bbf,stroke:#333
+                    style MT fill:#bfb,stroke:#333
+                    style RU,WPC,PLT,BF fill:#fbf,stroke:#333
+                    style SP,DI,TS fill:#fbb,stroke:#333
+                      
+                    classDef default fill:#fff,stroke:#333,stroke-width:2px;
+                    classDef condition fill:#e1f5fe,stroke:#333,stroke-width:2px;
+                    classDef decision fill:#fff3e0,stroke:#333,stroke-width:2px;
+                      
+                    class A1,B1 condition;
+                    class X1,X2,X3,X4,X5,Y1,Y2,Y3,Y4,Y5 decision;
+                    class RU1,RU2,WPC1,WPC2,PLT1,PLT2,BF1,BF2,SP1,SP2,DI1,DI2,TS1,TS2 decision;
+                </div>
+            `;
+            
+            // Mermaidの再描画
+            mermaid.init(undefined, document.querySelector(".mermaid"));
+        }
+
+        // モーダルを開いた時にチャートを再描画
+        function toggleLogicChart() {
+            const modal = document.getElementById('logicChartModal');
+            if (modal.style.display === 'block') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'block';
+                displayLogicChart();
+                // ウィンドサイズに合わせて再描画
+                window.dispatchEvent(new Event('resize'));
+            }
         }
     </script>
 </body>
