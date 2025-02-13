@@ -316,6 +316,8 @@
             --dark-surface: #2d2d2d;
             --mermaid-node-spacing: 100px;
             --mermaid-rank-spacing: 80px;
+            --header-color: #3b82f6;  /* 会話要約ヘッダーの色 */
+            --button-hover: #2563eb;  /* ホバー時の色 */
         }
 
         .icon-button {
@@ -648,34 +650,6 @@
             font-weight: 600;
         }
 
-        .help-tooltip {
-            position: relative;
-            display: inline-block;
-            margin-left: 8px;
-        }
-
-        .help-icon {
-            width: 16px;
-            height: 16px;
-            color: var(--gray-400);
-            cursor: pointer;
-        }
-
-        .help-content {
-            display: none;
-            position: absolute;
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 200px;
-            z-index: 100;
-        }
-
-        .help-tooltip:hover .help-content {
-            display: block;
-        }
-
         /* データモーダルのスタイル */
         .data-actions {
             display: flex;
@@ -771,82 +745,94 @@
         .voice-hearing-section {
             position: fixed;
             top: 0;
-            right: -100vw; /* 画面幅分だけ右に移動 */
-            width: 600px;
+            right: -100vw;
+            width: min(600px, 100%);
             height: 100vh;
             background: var(--surface);
             border-left: 1px solid var(--border);
             transition: right 0.4s ease-in-out;
-            z-index: 1000;
+            z-index: 2100;  /* ロジックチャートモーダル(2000)より上に */
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: hidden;
         }
-        
+
         .voice-hearing-section.visible {
             right: 0;
         }
-        
+
         /* 会話要約トグルボタン */
         #voiceToggleButton {
             position: fixed;
             right: 20px;
             bottom: 20px;
-            z-index: 1001;
+            z-index: 2200;  /* 常に最前面に */
             width: 60px;
             height: 60px;
             border-radius: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            font-size: 1.5em; /* アイコンサイズを大きく */
+            font-size: 1.5em;
             transition: all 0.3s ease;
+            background: var(--header-color);
+            color: white;
+            border: none;
+            cursor: pointer;
         }
-        
-        #voiceToggleButton:hover {
+
+        #voiceToggleButton:hover,
+        #logicChartButton:hover {
             transform: scale(1.1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            background: var(--button-hover);
         }
-        
-        /* 会話要約コンテンツのスタイル調整 */
-        .summary-container {
-            margin: 15px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            height: calc(100vh - 100px);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-        
-        /* スクロールバーのスタイリング */
-        .summary-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .summary-container::-webkit-scrollbar-track {
-            background: var(--surface);
-            border-radius: 4px;
-        }
-        
-        .summary-container::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 4px;
-        }
-        
-        .summary-container::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-hover);
-        }
-        
+
         /* 会話要約ヘッダー */
         .section-header {
             padding: 15px;
-            background: var(--primary);
+            background: var(--header-color);
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .section-header h3 {
             margin: 0;
+        }
+
+        /* モバイル対応のスタイル */
+        @media (max-width: 768px) {
+            .voice-hearing-section {
+                width: 100%;
+                right: -100%;
+                left: auto;
+            }
+            
+            .summary-container {
+                margin: 10px;
+                padding: 10px;
+            }
+            
+            .summary-item {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .conversation-text pre {
+                white-space: pre-wrap;
+                word-break: break-word;
+            }
+
+            #voiceToggleButton,
+            #logicChartButton {
+                right: 10px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+
+            #logicChartButton {
+                bottom: 70px;
+            }
         }
 
         .summary-item {
@@ -1019,18 +1005,17 @@
             position: fixed;
             right: 20px;
             bottom: 100px;
-            z-index: 1001;
+            z-index: 2200;  /* 常に最前面に */
             width: 60px;
             height: 60px;
             border-radius: 30px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             font-size: 1.5em;
             transition: all 0.3s ease;
-        }
-
-        #logicChartButton:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            background: var(--header-color);
+            color: white;
+            border: none;
+            cursor: pointer;
         }
 
         /* モーダルのスタイル */
@@ -1129,6 +1114,89 @@
         :root {
             --mermaid-node-spacing: 100px;
             --mermaid-rank-spacing: 80px;
+        }
+
+        /* 共通ボタンスタイル */
+        .icon-only-button {
+            background: var(--header-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-only-button:hover {
+            background: var(--button-hover);
+        }
+
+        /* 固定ボタンの共通スタイル */
+        .fixed-button {
+            position: fixed;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 1.5em;
+            z-index: 1001;
+        }
+
+        .fixed-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .fixed-button {
+                right: 10px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+
+            #voiceToggleButton {
+                bottom: 10px;
+            }
+
+            #logicChartButton {
+                bottom: 70px;
+            }
+        }
+
+        /* すべてのボタンの共通スタイル */
+        button {
+            background: var(--header-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background: var(--button-hover);
+        }
+
+        /* 結果表示ボタン */
+        #calculateButton {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 12px 24px;
+        }
+
+        /* データ入出力ボタン */
+        .data-io-buttons button {
+            margin: 5px;
+        }
+
+        /* モーダル内のボタン */
+        .modal-header button {
+            background: transparent;
+        }
+
+        .modal-header button:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -1345,16 +1413,9 @@
         </div>
     </div>
 
-    <div class="help-tooltip" data-title="ヘルプ">
-        <i data-lucide="help-circle" class="help-icon"></i>
-        <div class="help-content">
-            <h4>入力のヒント</h4>
-            <p>このセクションでは...</p>
-        </div>
-    </div>
 
     <!-- 会話要約表示切替ボタン -->
-    <button class="icon-only-button" onclick="toggleVoiceSection()" id="voiceToggleButton" title="会話要約の表示/非表示">
+    <button class="icon-only-button fixed-button" onclick="toggleVoiceSection()" id="voiceToggleButton" title="会話要約の表示/非表示">
         <i class="fas fa-comments"></i>
     </button>
 
@@ -1381,7 +1442,7 @@
     </div>
 
     <!-- ロジックチャート表示ボタン -->
-    <button class="icon-only-button" onclick="toggleLogicChart()" id="logicChartButton" title="ロジックチャート表示">
+    <button class="icon-only-button fixed-button" onclick="toggleLogicChart()" id="logicChartButton" title="ロジックチャート表示">
         <i class="fas fa-sitemap"></i>
     </button>
 
@@ -2407,11 +2468,11 @@ if (xrCount === 2) {
 
                     subgraph XR台数判定2
                     B[1時間当たりの最大検体数] --> B1{判定2}
-                    B1 -->|≧500| Y1[6台]
-                    B1 -->|≧400| Y2[5台]
-                    B1 -->|≧300| Y3[4台]
-                    B1 -->|≧200| Y4[3台]
-                    B1 -->|≧100| Y5[2台]
+                    B1 -->|≧400| Y1[5台]
+                    B1 -->|≧300| Y2[4台]
+                    B1 -->|≧200| Y3[3台]
+                    B1 -->|≧100| Y4[2台]
+                    B1 -->|その他| Y5[1台]
                     end
 
                     X1 & X2 & X3 & X4 & X5 --> XR{最大値選択}
@@ -2423,72 +2484,55 @@ if (xrCount === 2) {
                     MT -->|偶数台数かつ再検あり| TW[ツインモジュール]
                     MT -->|その他| SG[シングルモジュール]
                       
-                    %% RU判定
+                    %% オプション判定（直列処理）
                     TW & SG --> RU{RU判定}
-                    Q4[試薬使用量削減] --> RU
-                    Q5[在庫スペース削減] --> RU
+                    Q4[セルパックの交換頻度を減らしたい] --> RU
+                    Q5[セルパックの在庫スペースを削減したい] --> RU
                     RU -->|いずれかYes| RU1[RUあり]
                     RU -->|両方No| RU2[RUなし]
                       
-                    %% WPCチャンネル判定
-                    RU1 & RU2 --> WPC{WPC判定}
-                    Q6[造血幹細胞移植有無] --> WPC
-                    Q7[「Blasts/Abn Lympho?」精査] --> WPC
+                    RU1 --> WPC{WPC判定}
+                    RU2 --> WPC
+                    Q6[造血幹細胞移植] --> WPC
+                    Q7[IPメッセージ「Blasts/Abn Lympho?」の精査] --> WPC
                     WPC -->|いずれかYes| WPC1[WPCあり]
                     WPC -->|両方No| WPC2[WPCなし]
-+
-                    %% PLT-F判定
-                    WPC1 & WPC2 --> PLT{PLT-F判定}
-                    Q8[IPF臨床要望] --> PLT
-                    Q9[PLT5万以下検体] --> PLT
-                    Q10[破砕赤血球出現] --> PLT
+
+                    WPC1 --> PLT{PLT-F判定}
+                    WPC2 --> PLT
+                    Q8[IPF測定] --> PLT
+                    Q9[PLT5万以下] --> PLT
+                    Q10[破砕赤血球] --> PLT
                     PLT -->|いずれかYes| PLT1[PLT-Fあり]
                     PLT -->|全てNo| PLT2[PLT-Fなし]
-+
-                    %% BFモード判定
-                    PLT1 & PLT2 --> BF{BF判定}
+
+                    PLT1 --> BF{BF判定}
+                    PLT2 --> BF
                     Q11[体液機械値報告] --> BF
                     Q12[当直帯の体液測定] --> BF
                     Q13[体液鏡検者不足] --> BF
                     BF -->|いずれかYes| BF1[BFあり]
                     BF -->|全てNo| BF2[BFなし]
-+
-                    %% SP-50判定
-                    BF1 & BF2 --> SP{SP-50判定}
+
+                    BF1 --> SP{SP-50判定}
+                    BF2 --> SP
                     Q14[1日塗抹枚数] --> SP
                     SP -->|<150枚| SP1[SP-50 1台]
                     SP -->|≧150枚| SP2[SP-50 2台]
-+
-                    %% DI-60判定
-                    SP1 & SP2 --> DI{DI-60判定}
-                    Q15[現在のDI-60の有無] --> DI
+
+                    SP1 --> DI{DI-60判定}
+                    SP2 --> DI
+                    Q15[DI-60の有無] --> DI
                     Q16[鏡検数が200枚以上/日] --> DI
                     Q17[鏡検スキルの平準化] --> DI
                     DI -->|いずれかYes| DI1[DI-60あり]
                     DI -->|全てNo| DI2[DI-60なし]
-+
-                    %% TS-10判定
-                    DI1 & DI2 --> TS{TS-10判定}
-                    Q20[搬送システム] --> TS
+
+                    DI1 --> TS{TS-10判定}
+                    DI2 --> TS
+                    Q20[回収を端で行いたいか] --> TS
                     TS -->|あり| TS1[TS-10最後尾]
                     TS -->|なし| TS2[TS-10中央]
-                      
-                    %% 最終構成
-                    RU1 & RU2 & WPC1 & WPC2 & PLT1 & PLT2 & BF1 & BF2 & SP1 & SP2 & DI1 & DI2 & TS1 & TS2 --> P((構成パターン))
-                      
-                    style P fill:#f96,stroke:#333,stroke-width:4px
-                    style XR fill:#bbf,stroke:#333
-                    style MT fill:#bfb,stroke:#333
-                    style RU,WPC,PLT,BF fill:#fbf,stroke:#333
-                    style SP,DI,TS fill:#fbb,stroke:#333
-                      
-                    classDef default fill:#fff,stroke:#333,stroke-width:2px;
-                    classDef condition fill:#e1f5fe,stroke:#333,stroke-width:2px;
-                    classDef decision fill:#fff3e0,stroke:#333,stroke-width:2px;
-                      
-                    class A1,B1 condition;
-                    class X1,X2,X3,X4,X5,Y1,Y2,Y3,Y4,Y5 decision;
-                    class RU1,RU2,WPC1,WPC2,PLT1,PLT2,BF1,BF2,SP1,SP2,DI1,DI2,TS1,TS2 decision;
                 </div>
             `;
             
