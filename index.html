@@ -713,24 +713,58 @@
             color: var(--text-light);
         }
 
+        /* 会話要約コンテンツのスタイル調整 */
         .summary-container {
-            margin-top: 15px;
+            margin: 12px;
             padding: 15px;
             background: white;
             border-radius: 8px;
             border: 1px solid var(--border);
-            transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
-            max-height: 1000px;
-            opacity: 1;
-            overflow: hidden;
+            height: calc(95vh - 80px);
+            width: calc(100% - 24px);
+            box-sizing: border-box;
+            overflow-y: scroll;  /* autoからscrollに変更 */
+            -webkit-overflow-scrolling: touch;
         }
-        
-        .summary-container.collapsed {
-            max-height: 0;
-            opacity: 0;
-            padding: 0;
-            margin: 0;
-            border: none;
+
+        /* Webkit（Chrome, Safari, Edge）用スクロールバー - 直接のセレクタ指定 */
+        ::-webkit-scrollbar {
+            width: 14px !important;
+            background-color: #f0f0f0 !important;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #e0e0e0 !important;
+            border-radius: 8px !important;
+            margin: 2px !important;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #999 !important;
+            border-radius: 8px !important;
+            border: 3px solid #f0f0f0 !important;
+            background-clip: padding-box !important;
+        }
+
+        ::-webkit-scrollbar-thumb:hover,
+        ::-webkit-scrollbar-thumb:active {
+            background: #666 !important;
+            border: 2px solid #f0f0f0 !important;
+        }
+
+        /* Firefox用のスクロールバースタイル */
+        .summary-container {
+            scrollbar-width: thick !important;  /* thinからthickに変更 */
+            scrollbar-color: #999 #e0e0e0 !important;
+        }
+
+        @media (max-width: 768px) {
+            .summary-container {
+                margin: 8px;
+                padding: 10px;
+                width: calc(100% - 16px);
+                scrollbar-width: thick !important;
+            }
         }
 
         .toggle-button i {
@@ -742,7 +776,7 @@
         }
 
         /* 会話要約セクションのスライド表示 */
-        .voice-hearing-section {
+            .voice-hearing-section {
             position: fixed;
             top: 0;
             right: -620px;  /* デスクトップでの非表示位置 */
@@ -782,6 +816,11 @@
                 margin: 8px;
                 padding: 10px;
                 width: calc(100% - 16px);
+                scrollbar-width: thin;
+            }
+
+            .summary-container::-webkit-scrollbar {
+                width: 8px;
             }
 
             .conversation-text,
@@ -1265,32 +1304,6 @@
 
         .modal-header button:hover {
             background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* 会話要約コンテンツのスタイル調整 */
-        .summary-container {
-            margin: 8px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            height: calc(95vh - 80px);
-            width: calc(100% - 16px);
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-
-        @media (max-width: 768px) {
-            .voice-hearing-section {
-                width: 100%;
-                right: -100vw;
-            }
-            
-            .summary-container {
-                margin: 8px;
-                padding: 10px;
-                height: calc(100vh - 60px);
-            }
         }
 
         /* 音声録音セクション */
